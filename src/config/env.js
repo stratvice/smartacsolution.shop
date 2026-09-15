@@ -1,5 +1,5 @@
 'use strict';
-require('dotenv').config();
+require('./load-env');
 
 function bool(v, dflt = false) {
   if (v === undefined || v === '') return dflt;

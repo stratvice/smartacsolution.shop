@@ -12,3 +12,6 @@ Thumbs.db
 .pglite-data/
 .pglite.log
 .server.log
+
+# Deploy-persistent env file kept outside the versioned build dir
+.env.shared

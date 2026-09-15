@@ -21,7 +21,7 @@
 // Load .env here rather than in each entry point: scripts and the server
 // both reach the database through this module. dotenv never overrides a
 // variable the environment already set, so hPanel SetEnv still wins.
-require('dotenv').config();
+require('../config/load-env');
 const mysql = require('mysql2/promise');
 
 // ------------------------------------------------------------- connection
