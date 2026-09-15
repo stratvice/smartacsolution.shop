@@ -66,10 +66,12 @@ Things to know before extending it:
   MariaDB reports JSON columns as `longtext`, so genuinely-JSON columns are
   also declared explicitly in `JSON_COLUMNS`. Add to it when you add one.
 - `$transaction` is `Promise.all`, **not** a real transaction — no rollback.
-- Known latent gaps: `update()` returns null if the write changes a column
-  named in its own `where`; a nested `take` inside `include` limits total rows
-  rather than rows per parent; `include` with a `select` that omits `id`
-  returns empty relations.
+  This is the one place the adapter still diverges from Prisma's semantics.
+- `upsert` is check-then-insert, so two concurrent upserts of the same unique
+  key can race into a duplicate-key error rather than one becoming an update.
+- Relations are matched to parents by `id`, so `findMany` borrows `id` into the
+  `SELECT` when `include` is used with a `select` that omits it, then strips it
+  from the results. Keep that behaviour if you touch `findMany`.
 
 **Content model.** Everything on the page is a database row. `page_sections`
 holds one row per section with a section-shaped JSON `content` blob (see
