@@ -1,5 +1,6 @@
 'use strict';
 require('./load-env');
+const path = require('path');
 
 function bool(v, dflt = false) {
   if (v === undefined || v === '') return dflt;
@@ -37,6 +38,13 @@ const env = {
     folder: process.env.CLOUDINARY_FOLDER || 'websaf',
   },
   maxUploadMb: int(process.env.MAX_UPLOAD_MB, 5),
+  // Where local uploads are written. Must point OUTSIDE the deployed tree on
+  // any host that builds each release into a new directory (Hostinger, and
+  // most PaaS), or every uploaded image is deleted by the next deploy while
+  // its Media row survives and 404s.
+  uploadDir: process.env.UPLOAD_DIR
+    ? path.resolve(process.env.UPLOAD_DIR)
+    : path.join(__dirname, '..', '..', 'public', 'uploads'),
 
   corsOrigins: list(process.env.CORS_ORIGINS),
 

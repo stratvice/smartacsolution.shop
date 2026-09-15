@@ -89,6 +89,13 @@ app.use(
   })
 );
 
+// Uploads are served from their configured location rather than from within
+// public/, so they can live outside the deployed tree and survive a deploy.
+app.use(
+  '/uploads',
+  express.static(env.uploadDir, { maxAge: env.isProd ? '7d' : 0, etag: true, fallthrough: true })
+);
+
 // Makes req.admin available to every route and view.
 app.use(loadAdmin);
 app.use((req, res, next) => {

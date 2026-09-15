@@ -144,6 +144,15 @@ function toParam(field, value, info) {
 
 const OPS = { gt: '>', gte: '>=', lt: '<', lte: '<=', equals: '=', not: '<>' };
 
+/**
+ * Escape LIKE metacharacters so a search term is matched literally.
+ * Without this, a lead search for "100%" matches every row, and any "_"
+ * matches an arbitrary character. The backslash must go first.
+ */
+function likeLiteral(value) {
+  return String(value).replace(/[\\%_]/g, (ch) => '\\' + ch);
+}
+
 /** Compile a Prisma-style `where` object into SQL + bound params. */
 function buildWhere(where, info, params) {
   if (!where || !Object.keys(where).length) return '';
@@ -169,10 +178,10 @@ function buildWhere(where, info, params) {
         if (operand === undefined) continue;
         if (op === 'contains') {
           parts.push(`${col} LIKE ?`);
-          params.push(`%${operand}%`);
+          params.push(`%${likeLiteral(operand)}%`);
         } else if (op === 'startsWith') {
           parts.push(`${col} LIKE ?`);
-          params.push(`${operand}%`);
+          params.push(`${likeLiteral(operand)}%`);
         } else if (op === 'in') {
           if (!operand.length) parts.push('1=0');
           else {

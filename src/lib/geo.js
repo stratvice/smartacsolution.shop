@@ -74,8 +74,13 @@ async function reverseGeocode(lat, lon) {
 
 /** Extract the caller's public IP, honouring a trusted proxy header. */
 function clientIp(req) {
-  const fwd = req.headers['x-forwarded-for'];
-  const ip = (Array.isArray(fwd) ? fwd[0] : (fwd || '').split(',')[0].trim()) || req.ip || '';
+  // Deliberately req.ip, not X-Forwarded-For directly: the app sets
+  // `trust proxy` in server.js, so Express already picks the correct entry
+  // for the number of proxies in front of us. Reading the header ourselves and
+  // taking [0] would return whatever the *client* sent, since the real proxy
+  // appends the true address after it -- letting anyone forge the IP recorded
+  // against a lead.
+  const ip = req.ip || '';
   return ip.replace(/^::ffff:/, '');
 }
 

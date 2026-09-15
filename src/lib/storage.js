@@ -11,7 +11,7 @@ const path = require('path');
 const crypto = require('crypto');
 const env = require('../config/env');
 
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads');
+const UPLOAD_DIR = env.uploadDir;
 
 let cloudinary = null;
 function getCloudinary() {
