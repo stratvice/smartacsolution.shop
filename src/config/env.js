@@ -55,9 +55,24 @@ const env = {
     cacheTtlMin: int(process.env.GEO_CACHE_TTL_MIN, 720),
   },
 
-  // Transactional email (Resend). The API key is server-side only: it is never
-  // exposed to a template, an API response or the browser.
+  // Transactional email. Credentials are server-side only: never exposed to a
+  // template, an API response or the browser.
+  //
+  // EMAIL_DRIVER picks the transport:
+  //   resend - Resend HTTP API. Needs a domain verified with Resend.
+  //   smtp   - any SMTP server, Gmail included. Needs no domain verification,
+  //            which is why it is the quickest way to start sending.
   email: {
+    driver: (process.env.EMAIL_DRIVER || 'resend').toLowerCase(),
+    smtp: {
+      // Gmail defaults, so that case needs only SMTP_USER, SMTP_PASS, EMAIL_FROM.
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: int(process.env.SMTP_PORT, 587),
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+      // 465 is implicit TLS; 587 upgrades via STARTTLS.
+      secure: bool(process.env.SMTP_SECURE, int(process.env.SMTP_PORT, 587) === 465),
+    },
     resendApiKey: process.env.RESEND_API_KEY || '',
     from: process.env.EMAIL_FROM || '',
     replyTo: process.env.EMAIL_REPLY_TO || '',
@@ -93,9 +108,17 @@ if (missing.length) {
 }
 // Email is optional: the site and lead capture work fully without it, so this
 // is a warning rather than a boot failure.
-if (!env.email.resendApiKey || !env.email.from) {
+const emailReady =
+  env.email.driver === 'smtp'
+    ? Boolean(env.email.smtp.user && env.email.smtp.pass && env.email.from)
+    : Boolean(env.email.resendApiKey && env.email.from);
+if (!emailReady) {
+  const missing =
+    env.email.driver === 'smtp' ? 'SMTP_USER, SMTP_PASS and EMAIL_FROM' : 'RESEND_API_KEY and EMAIL_FROM';
   console.warn(
-    '[config] Lead email notifications are inactive — set RESEND_API_KEY and EMAIL_FROM to enable them. Leads are still saved normally.'
+    '[config] Lead email notifications are inactive — set ' +
+      missing +
+      ' to enable them. Leads are still saved normally.'
   );
 }
 // Local storage is only lossy when the upload directory sits inside the
