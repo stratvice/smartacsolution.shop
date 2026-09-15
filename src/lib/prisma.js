@@ -78,6 +78,16 @@ const MODELS = {
   siteSetting: 'site_settings',
 };
 
+/**
+ * Columns holding JSON that the server may not report as such. MariaDB
+ * implements JSON as LONGTEXT plus a json_valid() CHECK constraint, so
+ * SHOW COLUMNS says "longtext" and type sniffing alone would hand the driver
+ * a raw object (which stringifies to "[object Object]" and trips the check).
+ */
+const JSON_COLUMNS = {
+  page_sections: ["content"],
+};
+
 const metaCache = new Map();
 
 /** Column types for a table, read once and cached for the process lifetime. */
@@ -91,6 +101,9 @@ async function meta(table) {
     if (type === 'tinyint(1)') info.bool.add(c.Field);
     else if (type === 'json') info.json.add(c.Field);
     else if (type.startsWith('datetime') || type.startsWith('timestamp')) info.date.add(c.Field);
+  }
+  for (const c of JSON_COLUMNS[table] || []) {
+    if (info.columns.includes(c)) info.json.add(c);
   }
   info.hasUpdatedAt = info.columns.includes('updatedAt');
   metaCache.set(table, info);
@@ -117,8 +130,13 @@ function fromRow(row, info) {
 /** App value -> a value mysql2 can bind. */
 function toParam(field, value, info) {
   if (value === undefined) return undefined;
-  if (info.json.has(field)) return JSON.stringify(value === undefined ? null : value);
+  if (info.json.has(field)) return JSON.stringify(value === null ? null : value);
   if (typeof value === 'boolean') return value ? 1 : 0;
+  // Any other plain object/array is JSON too: never let one reach the driver
+  // and arrive as "[object Object]".
+  if (value !== null && typeof value === 'object' && !(value instanceof Date) && !Buffer.isBuffer(value)) {
+    return JSON.stringify(value);
+  }
   return value;
 }
 
