@@ -83,7 +83,7 @@ a { color: var(--teal-dark); }
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   margin-bottom: 2px;
   border-radius: 9px;
   color: rgba(255, 255, 255, 0.74);
@@ -96,15 +96,15 @@ a { color: var(--teal-dark); }
 .sidebar-nav a:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 .sidebar-nav a.active { background: var(--orange); color: #fff; font-weight: 600; }
 .sidebar-nav .nav-sep {
-  margin: 14px 12px 6px;
+  margin: 10px 12px 5px;
   font-size: 0.66rem;
   letter-spacing: 1.3px;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.36);
 }
 
-.sidebar-foot { padding: 12px 10px; border-top: 1px solid rgba(255,255,255,.1); }
-.sidebar-foot .who { padding: 0 12px 10px; font-size: .8rem; color: rgba(255,255,255,.6); }
+.sidebar-foot { padding: 10px 10px; border-top: 1px solid rgba(255,255,255,.1); }
+.sidebar-foot .who { padding: 0 12px 8px; font-size: .8rem; color: rgba(255,255,255,.6); }
 .sidebar-foot .who strong { display: block; color: #fff; font-family: 'DM Sans', sans-serif; font-size: .87rem; }
 .logout-btn {
   width: 100%;
@@ -630,7 +630,7 @@ input.input-error:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(1
 
 /* --- name cell with initial ---------------------------------------------- */
 
-.who { display: flex; align-items: center; gap: 9px; }
+.who-cell { display: flex; align-items: center; gap: 9px; }
 .avatar {
   flex: 0 0 auto;
   width: 30px;

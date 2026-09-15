@@ -8,7 +8,7 @@
       Storage: <%= driver === 'cloudinary' ? 'Cloudinary' : 'Local disk' %>
     </span>
     <% if (driver === 'local') { %>
-      <p>Files are stored in <code>public/uploads</code>. Set <code>STORAGE_DRIVER=cloudinary</code> plus the three Cloudinary keys in <code>.env</code> to switch to cloud storage — existing records keep working.</p>
+      <p>Uploads are written to the server directory set by <code>UPLOAD_DIR</code>, which is kept outside the deployed folder so images survive a redeploy. Set <code>STORAGE_DRIVER=cloudinary</code> plus the three Cloudinary keys to switch to cloud storage — existing records keep working.</p>
     <% } else { %>
       <p>Files are uploaded to Cloudinary. Only the URL and metadata are stored in the database.</p>
     <% } %>
