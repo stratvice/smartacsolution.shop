@@ -43,21 +43,26 @@ const leadQuerySchema = z.object({
   dir: z.enum(['asc', 'desc']).default('desc'),
 });
 
-/** Turn validated filters into a Prisma where clause. Exported for the pages. */
+/**
+ * Turn validated filters into a Prisma where clause. Exported for the pages.
+ *
+ * No `mode: 'insensitive'` here: Prisma does not support it on MySQL, and the
+ * schema's utf8mb4_unicode_ci collation already compares case-insensitively.
+ */
 function leadWhere(f) {
   const where = {};
   if (f.q) {
     where.OR = [
-      { name: { contains: f.q, mode: 'insensitive' } },
+      { name: { contains: f.q } },
       { phone: { contains: f.q } },
-      { email: { contains: f.q, mode: 'insensitive' } },
-      { message: { contains: f.q, mode: 'insensitive' } },
-      { city: { contains: f.q, mode: 'insensitive' } },
+      { email: { contains: f.q } },
+      { message: { contains: f.q } },
+      { city: { contains: f.q } },
     ];
   }
   if (f.status) where.status = f.status;
-  if (f.service) where.service = { contains: f.service, mode: 'insensitive' };
-  if (f.city) where.city = { contains: f.city, mode: 'insensitive' };
+  if (f.service) where.service = { contains: f.service };
+  if (f.city) where.city = { contains: f.city };
   if (f.from || f.to) {
     where.createdAt = {};
     if (f.from) {

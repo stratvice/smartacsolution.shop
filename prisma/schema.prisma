@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -54,11 +54,11 @@ model Service {
   id          Int      @id @default(autoincrement())
   title       String
   slug        String   @unique
-  description String
+  description String   @db.Text
   badge       String?
   icon        String   @default("fa fa-snowflake")
-  iconStyle   String? // optional inline gradient override, preserves original look
-  imageUrl    String?
+  iconStyle   String? @db.VarChar(500) // optional inline gradient override, preserves original look
+  imageUrl    String? @db.VarChar(500)
   imageAlt    String?
   buttonText  String   @default("Call Now")
   buttonLink  String   @default("#contact")
@@ -78,9 +78,9 @@ model Testimonial {
   id        Int      @id @default(autoincrement())
   name      String
   location  String?
-  review    String
+  review    String   @db.Text
   rating    Float    @default(5)
-  imageUrl  String?
+  imageUrl  String? @db.VarChar(500)
   order     Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -94,8 +94,8 @@ model Testimonial {
 
 model Faq {
   id        Int      @id @default(autoincrement())
-  question  String
-  answer    String
+  question  String   @db.Text
+  answer    String   @db.Text
   order     Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -130,7 +130,7 @@ model Lead {
   phone       String
   email       String?
   service     String?
-  message     String?
+  message     String?   @db.Text
   city        String?
   state       String?
   country     String?
@@ -142,16 +142,16 @@ model Lead {
   utmMedium   String?
   utmCampaign String?
   status      LeadStatus @default(NEW)
-  notes       String?
+  notes       String?   @db.Text
   // Email-notification outcome. Purely informational: a failure here never
   // affects the lead itself.
   notifyStatus     NotifyStatus @default(NOT_ATTEMPTED)
   notifyAt         DateTime?
-  notifyRecipients String? // who it went to, for the admin's reference
-  notifyError      String? // short, sanitised reason — never a credential
+  notifyRecipients String? @db.VarChar(1000) // who it went to, for the admin's reference
+  notifyError      String? @db.VarChar(500) // short, sanitised reason — never a credential
   ipAddress   String?
-  userAgent   String?
-  pageUrl     String?
+  userAgent   String? @db.VarChar(500)
+  pageUrl     String? @db.VarChar(500)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -169,7 +169,7 @@ model LeadNote {
   id        Int      @id @default(autoincrement())
   leadId    Int
   adminId   Int?
-  body      String
+  body      String   @db.Text
   createdAt DateTime @default(now())
 
   lead  Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
@@ -185,7 +185,7 @@ model LeadNote {
 
 model Media {
   id        Int      @id @default(autoincrement())
-  url       String
+  url       String   @db.VarChar(500)
   publicId  String? // storage provider handle, used for replace/delete
   provider  String   @default("local") // cloudinary | local
   filename  String
@@ -206,7 +206,7 @@ model Media {
 model SiteSetting {
   id        Int      @id @default(autoincrement())
   key       String   @unique
-  value     String   @default("")
+  value     String   @default("") @db.VarChar(1000)
   group     String   @default("general") // general | contact | social | seo | cta | location
   label     String   @default("")
   type      String   @default("text") // text | textarea | url | tel | email | image
