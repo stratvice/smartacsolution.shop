@@ -77,14 +77,27 @@
     }
 
     // Confirm every destructive action, wherever it appears.
-    document.addEventListener('click', function (e) {
-      var el = e.target.closest('[data-confirm]');
-      if (!el) return;
-      if (!window.confirm(el.getAttribute('data-confirm'))) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
+    //
+    // This MUST stay in the capture phase (the `true` below). Delete handlers
+    // are bound directly to their buttons, so they run in the target phase —
+    // before anything bubbling up to document. A bubble-phase guard here would
+    // fire only after the DELETE request had already been sent, making every
+    // "Cancel" decorative. Capture runs document-first, so cancelling here
+    // stops the event before it ever reaches the button's own listener.
+    document.addEventListener(
+      'click',
+      function (e) {
+        var el = e.target.closest('[data-confirm]');
+        if (!el) return;
+        if (!window.confirm(el.getAttribute('data-confirm'))) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Also blocks other listeners bound to the same element.
+          e.stopImmediatePropagation();
+        }
+      },
+      true
+    );
 
     // Live preview for any image URL input.
     document.addEventListener('change', function (e) {
