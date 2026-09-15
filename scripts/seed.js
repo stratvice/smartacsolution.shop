@@ -109,6 +109,8 @@ const SETTINGS = [
   ['seo_og_image', '/images/abt_rep.webp', 'seo', 'OG image', 'image', 6],
   ['seo_canonical_url', '', 'seo', 'Canonical URL', 'url', 7],
   ['seo_robots', 'index, follow', 'seo', 'Robots directive', 'text', 8],
+  ['analytics_ga4_id', '', 'seo', 'Google Analytics 4 measurement ID', 'text', 9],
+  ['google_site_verification', '', 'seo', 'Google Search Console verification token', 'text', 10],
 
   // Lead email notifications. Recipients are deliberately empty by default —
   // addresses are configured in Admin → Settings, never hard-coded here.

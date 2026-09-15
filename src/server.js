@@ -40,6 +40,7 @@ app.use(
           'https://cdn.jsdelivr.net',
           'https://cdnjs.cloudflare.com',
           'https://code.jquery.com',
+          'https://www.googletagmanager.com',
         ],
         styleSrc: [
           "'self'",
@@ -50,7 +51,8 @@ app.use(
         ],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'data:'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https:'],
-        connectSrc: ["'self'"],
+        // GA4 beacons go to these; without them the CSP blocks every hit silently.
+        connectSrc: ["'self'", 'https://www.google-analytics.com', 'https://region1.google-analytics.com', 'https://analytics.google.com'],
         frameSrc: ["'self'", 'https://www.google.com'],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
