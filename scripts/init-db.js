@@ -14,12 +14,17 @@ async function main() {
   const file = path.join(__dirname, '..', 'db', 'schema.sql');
   const sql = fs.readFileSync(file, 'utf8');
 
-  // Split on semicolons at end of line; the schema has no procedures or
-  // semicolons inside string literals, so this is sufficient here.
+  // Strip `--` comment lines first: every statement in the file is preceded by
+  // one, so splitting before stripping would discard the statements with them.
+  // The schema has no procedures and no semicolons inside string literals, so
+  // a plain semicolon split is sufficient here.
   const statements = sql
-    .split(/;\s*$/m)
+    .split('\n')
+    .filter((line) => !/^\s*--/.test(line))
+    .join('\n')
+    .split(';')
     .map((s) => s.trim())
-    .filter((s) => s && !/^--/.test(s));
+    .filter(Boolean);
 
   let applied = 0;
   for (const stmt of statements) {
