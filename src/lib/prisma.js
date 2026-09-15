@@ -248,11 +248,23 @@ function model(name, table) {
       const info = await meta(table);
       const params = [];
       const where = buildWhere(args.where, info, params);
-      let sql = `SELECT ${args.distinct ? 'DISTINCT ' : ''}${buildSelect(args.select, info)} FROM \`${table}\``;
+
+      // Relations are matched back to their parent by id, so id has to be in
+      // the SELECT even when the caller's `select` left it out — otherwise
+      // every relation comes back empty with no error. It is removed again
+      // below so the caller still gets exactly the columns it asked for.
+      const borrowedId = Boolean(args.include && args.select && !args.select.id);
+      const select = borrowedId ? { ...args.select, id: true } : args.select;
+
+      let sql = `SELECT ${args.distinct ? 'DISTINCT ' : ''}${buildSelect(select, info)} FROM \`${table}\``;
       if (where) sql += ` WHERE ${where}`;
       sql += buildOrder(args.orderBy) + limitClause(args);
       const rows = (await raw(sql, params)).map((r) => fromRow(r, info));
-      return args.include ? withInclude(rows, args.include) : rows;
+      if (!args.include) return rows;
+
+      const withRelations = await withInclude(rows, args.include);
+      if (borrowedId) for (const r of withRelations) delete r.id;
+      return withRelations;
     },
 
     async findFirst(args = {}) {
@@ -310,10 +322,18 @@ function model(name, table) {
       const whereParams = [];
       const where = buildWhere(args.where, info, whereParams);
       if (!where) throw new Error(`update on ${name} requires a where clause`);
+
+      // Resolve the target row *before* writing. Re-reading afterwards with the
+      // caller's original `where` returns nothing whenever the update changes a
+      // column that clause filters on — e.g. {where:{status:'NEW',id}, data:
+      // {status:'CONTACTED'}} would report null despite succeeding.
+      const target = await api.findFirst({ where: args.where, select: { id: true } });
+      if (!target) return null;
+
       const sql =
         `UPDATE \`${table}\` SET ${fields.map((f) => `\`${f}\` = ?`).join(', ')} WHERE ${where}`;
       await raw(sql, [...params, ...whereParams]);
-      return api.findFirst({ where: args.where });
+      return api.findFirst({ where: { id: target.id } });
     },
 
     async upsert(args) {
@@ -376,9 +396,12 @@ async function withInclude(rows, include) {
   const opts = include.leadNotes === true ? {} : include.leadNotes;
   const ids = rows.map((r) => r.id);
   const noteInfo = await meta('lead_notes');
+  // Notes for every parent come back in one query, so a `take` must NOT become
+  // a SQL LIMIT here — that would cap the total across all parents rather than
+  // per parent, leaving the first lead with all of them and the rest empty.
+  // The limit is applied per parent when the rows are grouped, below.
   let sql = `SELECT * FROM \`lead_notes\` WHERE \`leadId\` IN (${ids.map(() => '?').join(',')})`;
   sql += buildOrder(opts.orderBy || { createdAt: 'desc' });
-  if (opts.take) sql += ` LIMIT ${Number(opts.take)}`;
   const notes = (await raw(sql, ids)).map((r) => fromRow(r, noteInfo));
 
   // Attach each note's admin when the caller asked for it.
@@ -404,7 +427,14 @@ async function withInclude(rows, include) {
 
   const byLead = new Map(rows.map((r) => [r.id, []]));
   for (const n of notes) if (byLead.has(n.leadId)) byLead.get(n.leadId).push(n);
-  for (const r of rows) r.leadNotes = byLead.get(r.id) || [];
+
+  // `take` applies per parent, matching Prisma. The rows arrived already
+  // ordered, so the first N of each group are the right ones.
+  const perParent = opts.take ? Number(opts.take) : null;
+  for (const r of rows) {
+    const group = byLead.get(r.id) || [];
+    r.leadNotes = perParent === null ? group : group.slice(0, perParent);
+  }
   return rows;
 }
 
