@@ -26,6 +26,10 @@ const SHARED_NAME = '.env.shared';
 const MAX_LEVELS = 6;
 
 let loaded = false;
+// Directory the shared env file was found in. That folder sits outside the
+// versioned deploy tree by definition, which makes it the right home for
+// anything else that must outlive a release (backups, for one).
+let sharedDir = null;
 
 function load() {
   if (loaded) return;
@@ -41,6 +45,7 @@ function load() {
     const candidate = path.join(dir, SHARED_NAME);
     if (fs.existsSync(candidate)) {
       dotenv.config({ path: candidate });
+      sharedDir = dir;
       break;
     }
     const parent = path.dirname(dir);
@@ -51,4 +56,4 @@ function load() {
 
 load();
 
-module.exports = { load, APP_ROOT, SHARED_NAME };
+module.exports = { load, APP_ROOT, SHARED_NAME, sharedDir: () => sharedDir };

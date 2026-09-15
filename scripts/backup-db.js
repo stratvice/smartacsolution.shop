@@ -14,7 +14,7 @@
  * host deletes the previous deploy, and a backup that dies with the thing it
  * was protecting is not a backup.
  */
-require('../src/config/load-env');
+const loadEnv = require('../src/config/load-env');
 const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -38,8 +38,12 @@ function parseDatabaseUrl(raw) {
 
 function backupDir() {
   if (process.env.BACKUP_DIR) return path.resolve(process.env.BACKUP_DIR);
-  // Default: a "backups" folder beside the app's deploy root, not inside it.
-  return path.join(path.dirname(path.dirname(path.join(__dirname, '..'))), 'backups');
+  // Default beside .env.shared. That directory was located by walking up out
+  // of the versioned deploy tree, so it survives a release -- unlike counting
+  // parent directories, which lands inside hbuilds/versions on this host.
+  const shared = loadEnv.sharedDir();
+  if (shared) return path.join(shared, 'backups');
+  return path.join(loadEnv.APP_ROOT, 'backups');
 }
 
 function stamp() {
