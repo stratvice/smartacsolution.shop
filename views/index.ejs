@@ -49,7 +49,19 @@
     // difference between a plain blue link and a result carrying the phone
     // number, hours and rating — built entirely from settings already in the
     // admin, so it stays correct when those are edited.
-    const schemaAreas = [S.default_city, S.default_state].filter(Boolean);
+    // De-duplicated: city and state are often both "Goa" here, and repeating
+    // the same Place twice is noise in the markup.
+    const schemaAreas = [...new Set([S.default_city, S.default_state].filter(Boolean))];
+    // Schema.org requires absolute URLs for images; a relative path is dropped.
+    const abs = (u) => !u ? u : (/^https?:\/\//.test(u) ? u : canonical.replace(/\/$/, "") + (u.startsWith("/") ? u : "/" + u));
+    // openingHours has a defined grammar ("Mo-Sa 08:00-20:00"). The admin field
+    // is free text for humans, so only emit it when it already parses; invalid
+    // values are ignored by consumers and flagged in Search Console.
+    const hoursOk = /^(Mo|Tu|We|Th|Fr|Sa|Su)(-(Mo|Tu|We|Th|Fr|Sa|Su))?( \d{2}:\d{2}-\d{2}:\d{2})$/.test(String(S.working_hours || "").trim());
+    // ISO 3166-1 alpha-2 is preferred over a country name.
+    const COUNTRY_ISO = { india: "IN" };
+    const countryRaw = S.default_country || "India";
+    const country = COUNTRY_ISO[String(countryRaw).toLowerCase()] || countryRaw;
     const ratings = (testimonials || []).map(function (t) { return Number(t.rating) || 0 }).filter(Boolean);
     const schema = {
       '@context': 'https://schema.org',
@@ -57,16 +69,16 @@
       name: company,
       url: canonical,
       ...(S.seo_description ? { description: fmt.personalise(S.seo_description, null, defaults) } : {}),
-      ...(S.logo_url ? { logo: S.logo_url, image: S.logo_url } : (S.seo_og_image ? { image: S.seo_og_image } : {})),
+      ...(S.logo_url ? { logo: abs(S.logo_url), image: abs(S.logo_url) } : (S.seo_og_image ? { image: abs(S.seo_og_image) } : {})),
       ...(phone ? { telephone: phone } : {}),
       ...(S.email ? { email: S.email } : {}),
       ...(S.address ? { address: { '@type': 'PostalAddress', streetAddress: S.address,
             ...(S.default_city ? { addressLocality: S.default_city } : {}),
             ...(S.default_state ? { addressRegion: S.default_state } : {}),
-            addressCountry: S.default_country || 'IN' } } : {}),
+            addressCountry: country } } : {}),
       ...(schemaAreas.length ? { areaServed: schemaAreas.map(function (a) { return { '@type': 'Place', name: a } }) } : {}),
       ...(S.maps_url ? { hasMap: S.maps_url } : {}),
-      ...(S.working_hours ? { openingHours: S.working_hours } : {}),
+      ...(hoursOk ? { openingHours: S.working_hours.trim() } : {}),
       ...(ratings.length ? { aggregateRating: { '@type': 'AggregateRating',
             ratingValue: (ratings.reduce(function (a, b) { return a + b }, 0) / ratings.length).toFixed(1),
             reviewCount: String(ratings.length) } } : {}),
