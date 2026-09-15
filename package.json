@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
@@ -35,12 +36,12 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.3.0",
+    "prisma": "^6.19.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@electric-sql/pglite-socket": "^0.2.11",
-    "nodemon": "^3.1.9",
-    "prisma": "^6.19.3"
+    "nodemon": "^3.1.9"
   }
 }
