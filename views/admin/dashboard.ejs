@@ -1,46 +1,113 @@
 <%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+<%
+  // Pipeline is the lead lifecycle in order; "open" is everything not finished.
+  const open = counts.NEW + counts.CONTACTED + counts.INTERESTED;
+  const convRate = total ? Math.round((counts.CONVERTED / total) * 100) : 0;
+  const delta = thisWeek - lastWeek;
+  const peak = Math.max(1, ...daily.map(function (d) { return d.count; }));
+  const pipeline = [
+    { key: 'NEW', label: 'New', hint: 'Needs first contact' },
+    { key: 'CONTACTED', label: 'Contacted', hint: 'In progress' },
+    { key: 'INTERESTED', label: 'Interested', hint: 'Warm' },
+    { key: 'CONVERTED', label: 'Converted', hint: 'Won' },
+    { key: 'CLOSED', label: 'Closed', hint: 'Finished' },
+  ];
+%>
 
-<div class="stat-grid">
-  <div class="stat is-total">
-    <div class="label">Total Leads</div>
-    <div class="value"><%= total %></div>
-    <div class="foot">All time</div>
+<div class="kpi-row">
+  <div class="kpi kpi-primary">
+    <div class="kpi-label">Total leads</div>
+    <div class="kpi-value"><%= total %></div>
+    <div class="kpi-foot">
+      <% if (delta > 0) { %>
+        <span class="trend up"><i class="fa fa-arrow-up"></i> <%= delta %></span> vs previous 7 days
+      <% } else if (delta < 0) { %>
+        <span class="trend down"><i class="fa fa-arrow-down"></i> <%= Math.abs(delta) %></span> vs previous 7 days
+      <% } else { %>
+        <span class="trend flat">No change</span> vs previous 7 days
+      <% } %>
+    </div>
   </div>
-  <div class="stat is-new">
-    <div class="label">New</div>
-    <div class="value"><%= counts.NEW %></div>
-    <div class="foot"><a href="/admin/leads?status=NEW">Needs first contact</a></div>
+
+  <div class="kpi">
+    <div class="kpi-label">Awaiting contact</div>
+    <div class="kpi-value <%= counts.NEW ? 'is-urgent' : '' %>"><%= counts.NEW %></div>
+    <div class="kpi-foot">
+      <% if (counts.NEW) { %>
+        <a href="/admin/leads?status=NEW">Call them now →</a>
+      <% } else { %>
+        <span class="muted">All caught up</span>
+      <% } %>
+    </div>
   </div>
-  <div class="stat is-contacted">
-    <div class="label">Contacted</div>
-    <div class="value"><%= counts.CONTACTED %></div>
-    <div class="foot"><a href="/admin/leads?status=CONTACTED">In progress</a></div>
+
+  <div class="kpi">
+    <div class="kpi-label">Open pipeline</div>
+    <div class="kpi-value"><%= open %></div>
+    <div class="kpi-foot muted">Not yet won or closed</div>
   </div>
-  <div class="stat is-interested">
-    <div class="label">Interested</div>
-    <div class="value"><%= counts.INTERESTED %></div>
-    <div class="foot"><a href="/admin/leads?status=INTERESTED">Warm</a></div>
+
+  <div class="kpi">
+    <div class="kpi-label">Conversion</div>
+    <div class="kpi-value"><%= convRate %><span class="kpi-unit">%</span></div>
+    <div class="kpi-foot muted"><%= counts.CONVERTED %> of <%= total %> won</div>
   </div>
-  <div class="stat is-converted">
-    <div class="label">Converted</div>
-    <div class="value"><%= counts.CONVERTED %></div>
-    <div class="foot"><a href="/admin/leads?status=CONVERTED">Won</a></div>
+</div>
+
+<div class="dash-split">
+  <div class="card-admin">
+    <header>
+      <h2>Leads, last 14 days</h2>
+      <div class="spacer"></div>
+      <span class="pill"><%= thisWeek %> this week</span>
+    </header>
+    <div class="card-body">
+      <% if (!total) { %>
+        <div class="empty-state">
+          <i class="fa fa-chart-column"></i>
+          No leads yet — the chart fills in as enquiries arrive.
+        </div>
+      <% } else { %>
+        <div class="chart" role="img" aria-label="Daily lead volume for the last 14 days">
+          <% daily.forEach(function (d) { %>
+            <div class="chart-col" title="<%= d.label %>: <%= d.count %> lead<%= d.count === 1 ? '' : 's' %>">
+              <div class="chart-bar <%= d.count ? '' : 'is-zero' %>" style="height: <%= Math.round((d.count / peak) * 100) %>%">
+                <span class="chart-num"><%= d.count %></span>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+        <div class="chart-axis">
+          <span><%= daily[0].label %></span>
+          <span><%= daily[daily.length - 1].label %></span>
+        </div>
+      <% } %>
+    </div>
   </div>
-  <div class="stat is-closed">
-    <div class="label">Closed</div>
-    <div class="value"><%= counts.CLOSED %></div>
-    <div class="foot"><a href="/admin/leads?status=CLOSED">Finished</a></div>
-  </div>
-  <div class="stat is-services">
-    <div class="label">Total Services</div>
-    <div class="value"><%= servicesCount %></div>
-    <div class="foot"><a href="/admin/services">Manage services</a></div>
+
+  <div class="card-admin">
+    <header><h2>Pipeline</h2></header>
+    <div class="card-body">
+      <% pipeline.forEach(function (s) { %>
+        <a class="pipe-row" href="/admin/leads?status=<%= s.key %>">
+          <span class="pipe-dot dot-<%= s.key %>"></span>
+          <span class="pipe-label">
+            <%= s.label %>
+            <small><%= s.hint %></small>
+          </span>
+          <span class="pipe-bar">
+            <span class="pipe-fill fill-<%= s.key %>" style="width: <%= total ? Math.round((counts[s.key] / total) * 100) : 0 %>%"></span>
+          </span>
+          <span class="pipe-count"><%= counts[s.key] %></span>
+        </a>
+      <% }); %>
+    </div>
   </div>
 </div>
 
 <div class="card-admin">
   <header>
-    <h2>Recent Leads</h2>
+    <h2>Recent leads</h2>
     <div class="spacer"></div>
     <a class="btn-a btn-sm-a" href="/admin/leads"><i class="fa fa-list"></i> View all</a>
   </header>
@@ -67,7 +134,12 @@
         <tbody>
           <% recent.forEach(function (l) { %>
           <tr>
-            <td><strong><%= l.name %></strong></td>
+            <td>
+              <span class="who">
+                <span class="avatar"><%= (l.name || '?').trim().charAt(0).toUpperCase() %></span>
+                <strong><%= l.name %></strong>
+              </span>
+            </td>
             <td class="nowrap"><a href="tel:<%= l.phone.replace(/[^\d+]/g, '') %>"><%= l.phone %></a></td>
             <td><%= l.service || '—' %></td>
             <td><%= [l.city, l.state].filter(Boolean).join(', ') || '—' %></td>
@@ -84,21 +156,31 @@
   <% } %>
 </div>
 
-<div class="stat-grid">
-  <div class="stat is-services">
-    <div class="label">Testimonials</div>
-    <div class="value"><%= testimonials %></div>
-    <div class="foot"><a href="/admin/testimonials">Manage</a></div>
-  </div>
-  <div class="stat is-services">
-    <div class="label">FAQs</div>
-    <div class="value"><%= faqs %></div>
-    <div class="foot"><a href="/admin/faqs">Manage</a></div>
-  </div>
-  <div class="stat is-services">
-    <div class="label">Media files</div>
-    <div class="value"><%= media %></div>
-    <div class="foot"><a href="/admin/media">Manage</a></div>
+<div class="card-admin">
+  <header><h2>Site content</h2></header>
+  <div class="card-body">
+    <div class="mini-grid">
+      <a class="mini" href="/admin/services">
+        <i class="fa fa-screwdriver-wrench"></i>
+        <span class="mini-value"><%= servicesCount %></span>
+        <span class="mini-label">Services</span>
+      </a>
+      <a class="mini" href="/admin/testimonials">
+        <i class="fa fa-quote-left"></i>
+        <span class="mini-value"><%= testimonials %></span>
+        <span class="mini-label">Testimonials</span>
+      </a>
+      <a class="mini" href="/admin/faqs">
+        <i class="fa fa-circle-question"></i>
+        <span class="mini-value"><%= faqs %></span>
+        <span class="mini-label">FAQs</span>
+      </a>
+      <a class="mini" href="/admin/media">
+        <i class="fa fa-images"></i>
+        <span class="mini-value"><%= media %></span>
+        <span class="mini-label">Media files</span>
+      </a>
+    </div>
   </div>
 </div>
 

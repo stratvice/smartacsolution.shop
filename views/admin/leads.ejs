@@ -105,8 +105,13 @@
         %>
         <tr data-lead-row="<%= l.id %>">
           <td>
-            <strong><%= l.name %></strong>
-            <% if (l.email) { %><div class="muted" style="font-size:.78rem;"><%= l.email %></div><% } %>
+            <span class="who">
+              <span class="avatar"><%= (l.name || '?').trim().charAt(0).toUpperCase() %></span>
+              <span>
+                <strong><%= l.name %></strong>
+                <% if (l.email) { %><div class="muted" style="font-size:.78rem;"><%= l.email %></div><% } %>
+              </span>
+            </span>
           </td>
           <td class="nowrap"><a href="tel:<%= digits %>"><%= l.phone %></a></td>
           <td><%= l.service || '—' %></td>
@@ -119,7 +124,7 @@
             <% if (l.utmSource) { %><div class="muted" style="font-size:.72rem;"><%= l.utmSource %><%= l.utmCampaign ? ' / ' + l.utmCampaign : '' %></div><% } %>
           </td>
           <td>
-            <select class="badge-select" data-status-select="<%= l.id %>" style="padding:4px 8px;font-size:.76rem;font-weight:700;border-radius:999px;">
+            <select class="badge-select status-<%= l.status %>" data-status-select="<%= l.id %>">
               <% STATUSES.forEach(function (s) { %>
               <option value="<%= s %>" <%= l.status === s ? 'selected' : '' %>><%= s %></option>
               <% }); %>
@@ -332,13 +337,27 @@
     btn.addEventListener('click', function () { load(btn.getAttribute('data-open-lead')); });
   });
 
-  // Inline status change straight from the table.
+  // Inline status change straight from the table. The select is colour-coded by
+  // status, so recolour it optimistically and roll back if the save fails.
+  function paintStatus(sel, status) {
+    sel.className = 'badge-select status-' + status;
+  }
   document.querySelectorAll('[data-status-select]').forEach(function (sel) {
+    var previous = sel.value;
     sel.addEventListener('change', function () {
       var id = sel.getAttribute('data-status-select');
-      A.api('PATCH', '/api/admin/leads/' + id, { status: sel.value })
-        .then(function () { A.toast('Status updated to ' + sel.value, 'ok'); })
-        .catch(function (e) { A.toast(e.message, 'err'); });
+      var next = sel.value;
+      paintStatus(sel, next);
+      A.api('PATCH', '/api/admin/leads/' + id, { status: next })
+        .then(function () {
+          previous = next;
+          A.toast('Status updated to ' + next, 'ok');
+        })
+        .catch(function (e) {
+          sel.value = previous;
+          paintStatus(sel, previous);
+          A.toast(e.message, 'err');
+        });
     });
   });
 

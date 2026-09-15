@@ -464,3 +464,228 @@ input.input-error {
   background: #fff6f5;
 }
 input.input-error:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(180, 35, 24, .12); }
+
+/* ==========================================================================
+   DASHBOARD  —  KPI row, volume chart, pipeline, content tiles
+   ========================================================================== */
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+/* The headline metric earns a heavier treatment than the supporting three. */
+.kpi-primary {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-deep) 100%);
+  border-color: transparent;
+}
+.kpi-primary .kpi-label { color: rgba(255, 255, 255, 0.72); }
+.kpi-primary .kpi-value { color: #fff; }
+.kpi-primary .kpi-foot { color: rgba(255, 255, 255, 0.64); }
+
+.kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.kpi-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--navy);
+  margin: 2px 0 4px;
+}
+.kpi-value.is-urgent { color: var(--orange-dark); }
+.kpi-unit { font-size: 1.3rem; margin-left: 2px; opacity: 0.75; }
+.kpi-foot { font-size: 0.78rem; color: var(--muted); }
+.kpi-foot a { color: var(--teal-dark); font-weight: 600; text-decoration: none; }
+.kpi-foot a:hover { text-decoration: underline; }
+
+.trend { font-weight: 700; }
+.trend.up { color: var(--green); }
+.trend.down { color: var(--red); }
+.kpi-primary .trend.up { color: #6ee7b7; }
+.kpi-primary .trend.down { color: #fca5a5; }
+.trend.flat { color: inherit; opacity: 0.8; }
+
+/* Two-up on wide screens, stacked on narrow. */
+.dash-split {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 14px;
+  margin-bottom: 0;
+}
+@media (max-width: 960px) {
+  .dash-split { grid-template-columns: 1fr; }
+}
+
+/* --- daily volume chart: pure CSS, no charting library ------------------- */
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 150px;
+  padding-top: 18px;
+}
+.chart-col { flex: 1; display: flex; align-items: flex-end; height: 100%; }
+.chart-bar {
+  position: relative;
+  width: 100%;
+  min-height: 3px;
+  border-radius: 5px 5px 2px 2px;
+  background: linear-gradient(180deg, var(--teal) 0%, #7fd4d4 100%);
+  transition: filter 0.15s ease;
+}
+.chart-bar.is-zero { background: var(--line); }
+.chart-col:hover .chart-bar { filter: brightness(0.92); }
+.chart-num {
+  position: absolute;
+  top: -16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.chart-bar.is-zero .chart-num { opacity: 0; }
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* --- pipeline ------------------------------------------------------------ */
+
+.pipe-row {
+  display: grid;
+  grid-template-columns: 10px 1fr 90px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.12s ease;
+}
+.pipe-row:hover { background: #f7fafc; }
+.pipe-dot { width: 10px; height: 10px; border-radius: 50%; }
+.pipe-label { font-size: 0.86rem; font-weight: 600; color: var(--text); line-height: 1.25; }
+.pipe-label small { display: block; font-size: 0.72rem; font-weight: 500; color: var(--muted); }
+.pipe-bar { height: 7px; border-radius: 999px; background: #eef2f6; overflow: hidden; }
+.pipe-fill { display: block; height: 100%; border-radius: 999px; min-width: 0; transition: width 0.3s ease; }
+.pipe-count {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy);
+  text-align: right;
+}
+
+.dot-NEW, .fill-NEW { background: var(--orange); }
+.dot-CONTACTED, .fill-CONTACTED { background: #3b82f6; }
+.dot-INTERESTED, .fill-INTERESTED { background: #8b5cf6; }
+.dot-CONVERTED, .fill-CONVERTED { background: var(--green); }
+.dot-CLOSED, .fill-CLOSED { background: #94a3b8; }
+
+/* --- content tiles ------------------------------------------------------- */
+
+.mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+.mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.mini:hover {
+  border-color: var(--teal);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.mini i { font-size: 1.15rem; color: var(--teal); margin-bottom: 4px; }
+.mini-value { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--navy); line-height: 1; }
+.mini-label { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+/* --- name cell with initial ---------------------------------------------- */
+
+.who { display: flex; align-items: center; gap: 9px; }
+.avatar {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #eaf4f7;
+  color: var(--teal-dark);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   POLISH  —  applies across every admin screen
+   ========================================================================== */
+
+/* Visible focus for keyboard users; the browser default was being lost
+   against the card backgrounds. */
+.admin-shell a:focus-visible,
+.admin-shell button:focus-visible,
+.admin-shell input:focus-visible,
+.admin-shell select:focus-visible,
+.admin-shell textarea:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.btn-a, .btn-icon, .mini, .pipe-row { transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease; }
+.btn-a:active, .btn-icon:active { transform: translateY(1px); }
+
+table.admin-table tbody tr { transition: background 0.12s ease; }
+
+/* --- status select, coloured like the badge it replaces ------------------ */
+
+.badge-select {
+  padding: 4px 26px 4px 11px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 9px;
+  /* Chevron drawn inline so it inherits no colour from the OS widget. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23667' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.badge-select.status-NEW { background-color: #fff4e5; color: var(--amber); border-color: #ffd8a8; }
+.badge-select.status-CONTACTED { background-color: #e7f0ff; color: #1d4ed8; border-color: #c3d9ff; }
+.badge-select.status-INTERESTED { background-color: #f3e8ff; color: #6b21a8; border-color: #e0c9ff; }
+.badge-select.status-CONVERTED { background-color: #e6f6ee; color: var(--green); border-color: #bbe7d0; }
+.badge-select.status-CLOSED { background-color: #eef1f4; color: #475569; border-color: #d8dfe6; }
+.badge-select:hover { filter: brightness(0.97); }

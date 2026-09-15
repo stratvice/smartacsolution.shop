@@ -112,6 +112,35 @@ router.get(
     const counts = Object.fromEntries(STATUSES.map((s) => [s, 0]));
     for (const row of byStatus) counts[row.status] = row._count._all;
 
+    // Daily volume for the last 14 days, zero-filled so the chart keeps an
+    // even axis on quiet days rather than collapsing the gaps.
+    const DAYS = 14;
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - (DAYS - 1));
+
+    const rows = await prisma.$queryRawUnsafe(
+      'SELECT DATE(createdAt) AS d, COUNT(*) AS n FROM leads WHERE createdAt >= ? GROUP BY DATE(createdAt) ORDER BY d',
+      since
+    );
+    const byDay = new Map(
+      rows.map((r) => [
+        r.d instanceof Date ? r.d.toISOString().slice(0, 10) : String(r.d).slice(0, 10),
+        Number(r.n),
+      ])
+    );
+    const daily = [];
+    for (let i = 0; i < DAYS; i++) {
+      const day = new Date(since);
+      day.setDate(since.getDate() + i);
+      const key = day.toISOString().slice(0, 10);
+      daily.push({ date: key, label: day.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }), count: byDay.get(key) || 0 });
+    }
+
+    // Last 7 days against the 7 before it, for the trend arrow.
+    const thisWeek = daily.slice(7).reduce((a, d) => a + d.count, 0);
+    const lastWeek = daily.slice(0, 7).reduce((a, d) => a + d.count, 0);
+
     res.render('admin/dashboard', {
       title: 'Dashboard',
       active: 'dashboard',
@@ -123,6 +152,9 @@ router.get(
       media,
       recent,
       STATUSES,
+      daily,
+      thisWeek,
+      lastWeek,
     });
   })
 );
