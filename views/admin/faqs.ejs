@@ -1,0 +1,132 @@
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="card-admin">
+  <header>
+    <h2>FAQs</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-primary-a" data-new><i class="fa fa-plus"></i> Add FAQ</button>
+    <p>Rendered as the accordion in the FAQ section. The first visible FAQ is open by default.</p>
+  </header>
+  <div class="card-body">
+    <% if (!faqs.length) { %>
+      <div class="empty-state"><i class="fa fa-circle-question"></i> No FAQs yet.</div>
+    <% } %>
+    <% faqs.forEach(function (f) { %>
+    <div class="repeat-item">
+      <div class="repeat-head">
+        <strong>#<%= f.order %></strong>
+        <span class="pill <%= f.isActive ? 'on' : 'off' %>"><%= f.isActive ? 'Live' : 'Hidden' %></span>
+        <div class="spacer"></div>
+        <button class="btn-a btn-sm-a" data-edit="<%= f.id %>"><i class="fa fa-pen"></i> Edit</button>
+        <button class="btn-a btn-sm-a btn-danger-a" data-delete="<%= f.id %>"
+                data-confirm="Delete this FAQ?"><i class="fa fa-trash"></i></button>
+      </div>
+      <strong style="display:block;font-size:.95rem;"><%= f.question %></strong>
+      <div class="muted" style="font-size:.86rem;margin-top:4px;"><%= f.answer %></div>
+    </div>
+    <% }); %>
+  </div>
+</div>
+
+<div class="drawer-backdrop" data-drawer-backdrop></div>
+<aside class="drawer" data-drawer aria-hidden="true">
+  <header>
+    <h2 data-drawer-title>FAQ</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-icon" data-drawer-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+  </header>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Question</label>
+      <input type="text" data-field="question" maxlength="500"/>
+    </div>
+    <div class="field">
+      <label>Answer</label>
+      <textarea data-field="answer" rows="7" maxlength="4000"></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Display order</label>
+        <input type="number" data-field="order" min="0" max="9999"/>
+      </div>
+      <div class="field">
+        <label>Visible</label>
+        <label class="check"><input type="checkbox" data-field="isActive"/> Show on website</label>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="btn-row">
+      <button class="btn-a btn-primary-a" data-save><i class="fa fa-floppy-disk"></i> Save FAQ</button>
+      <button class="btn-a" data-drawer-close>Cancel</button>
+    </div>
+  </div>
+</aside>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+  var drawer = document.querySelector('[data-drawer]');
+  var backdrop = document.querySelector('[data-drawer-backdrop]');
+  var rows = <%- JSON.stringify(faqs) %>;
+  var editingId = null;
+
+  function field(n) { return drawer.querySelector('[data-field="' + n + '"]'); }
+  function open(row) {
+    editingId = row ? row.id : null;
+    drawer.querySelector('[data-drawer-title]').textContent = row ? 'Edit FAQ' : 'New FAQ';
+    var f = row || { question: '', answer: '', order: rows.length + 1, isActive: true };
+    ['question','answer','order'].forEach(function (k) { field(k).value = f[k] == null ? '' : f[k]; });
+    field('isActive').checked = f.isActive !== false;
+    drawer.classList.add('open'); backdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+  function close() {
+    drawer.classList.remove('open'); backdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  drawer.querySelectorAll('[data-drawer-close]').forEach(function (b) { b.addEventListener('click', close); });
+  backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  document.querySelector('[data-new]').addEventListener('click', function () { open(null); });
+  document.querySelectorAll('[data-edit]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = Number(b.getAttribute('data-edit'));
+      open(rows.filter(function (r) { return r.id === id; })[0]);
+    });
+  });
+  document.querySelectorAll('[data-delete]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      A.api('DELETE', '/api/admin/faqs/' + b.getAttribute('data-delete'))
+        .then(function () { A.toast('FAQ deleted', 'ok'); setTimeout(function () { location.reload(); }, 500); })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  });
+
+  drawer.querySelector('[data-save]').addEventListener('click', function () {
+    var payload = {
+      question: field('question').value.trim(),
+      answer: field('answer').value.trim(),
+      order: Number(field('order').value) || 0,
+      isActive: field('isActive').checked,
+    };
+    if (payload.question.length < 2) { A.toast('Question is required.', 'err'); return; }
+    if (payload.answer.length < 2) { A.toast('Answer is required.', 'err'); return; }
+
+    (editingId
+      ? A.api('PUT', '/api/admin/faqs/' + editingId, payload)
+      : A.api('POST', '/api/admin/faqs', payload))
+      .then(function () {
+        A.toast('FAQ saved — the website is updated.', 'ok');
+        setTimeout(function () { location.reload(); }, 600);
+      })
+      .catch(function (e) { A.toast(e.message, 'err'); });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

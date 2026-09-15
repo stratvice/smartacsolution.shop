@@ -1,0 +1,183 @@
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="card-admin">
+  <header>
+    <h2>Testimonials</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-primary-a" data-new><i class="fa fa-plus"></i> Add testimonial</button>
+    <p>Shown in the review carousel. Without an image the card falls back to the customer's initial, exactly as on the current site.</p>
+  </header>
+  <div class="card-body">
+    <% if (!testimonials.length) { %>
+      <div class="empty-state"><i class="fa fa-quote-left"></i> No testimonials yet.</div>
+    <% } %>
+    <% testimonials.forEach(function (t) { %>
+    <div class="repeat-item">
+      <div class="repeat-head">
+        <strong>#<%= t.order %></strong>
+        <span class="pill <%= t.isActive ? 'on' : 'off' %>"><%= t.isActive ? 'Live' : 'Hidden' %></span>
+        <span class="pill"><%= t.rating %> ★</span>
+        <div class="spacer"></div>
+        <button class="btn-a btn-sm-a" data-edit="<%= t.id %>"><i class="fa fa-pen"></i> Edit</button>
+        <button class="btn-a btn-sm-a btn-danger-a" data-delete="<%= t.id %>"
+                data-confirm="Delete the testimonial from <%= t.name %>?"><i class="fa fa-trash"></i></button>
+      </div>
+      <div style="display:flex;gap:13px;align-items:flex-start;">
+        <div style="width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:#0c2b47 center/cover no-repeat;<% if (t.imageUrl) { %>background-image:url('<%= t.imageUrl %>');<% } %>display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+          <%= t.imageUrl ? '' : t.name.charAt(0).toUpperCase() %>
+        </div>
+        <div style="min-width:0;">
+          <strong><%= t.name %></strong>
+          <span class="muted" style="font-size:.83rem;"><%= t.location ? '· ' + t.location : '' %></span>
+          <div class="muted" style="font-size:.86rem;margin-top:4px;"><%= t.review.slice(0, 190) %><%= t.review.length > 190 ? '…' : '' %></div>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</div>
+
+<div class="drawer-backdrop" data-drawer-backdrop></div>
+<aside class="drawer" data-drawer aria-hidden="true">
+  <header>
+    <h2 data-drawer-title>Testimonial</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-icon" data-drawer-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+  </header>
+  <div class="drawer-body">
+    <div class="field">
+      <label>Customer name</label>
+      <input type="text" data-field="name" maxlength="120"/>
+    </div>
+    <div class="field">
+      <label>Location <span class="hint">(shown under the name)</span></label>
+      <input type="text" data-field="location" maxlength="160" placeholder="Panaji, Goa"/>
+    </div>
+    <div class="field">
+      <label>Review</label>
+      <textarea data-field="review" rows="6" maxlength="3000"></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Rating (0–5)</label>
+        <input type="number" data-field="rating" min="0" max="5" step="0.5"/>
+      </div>
+      <div class="field">
+        <label>Display order</label>
+        <input type="number" data-field="order" min="0" max="9999"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Customer image <span class="hint">(optional)</span></label>
+      <div class="image-picker">
+        <div class="preview" data-preview><i class="fa fa-user"></i></div>
+        <div class="picker-body">
+          <input type="text" data-field="imageUrl" placeholder="/uploads/customer.jpg"/>
+          <div class="btn-row" style="margin-top:7px;">
+            <select data-media-picker style="max-width:230px;">
+              <option value="">Pick from media library…</option>
+              <% media.forEach(function (m) { %>
+              <option value="<%= m.url %>"><%= m.filename %></option>
+              <% }); %>
+            </select>
+            <a class="btn-a btn-sm-a" href="/admin/media" target="_blank"><i class="fa fa-upload"></i> Upload</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="check"><input type="checkbox" data-field="isActive"/> Show on website</label>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="btn-row">
+      <button class="btn-a btn-primary-a" data-save><i class="fa fa-floppy-disk"></i> Save testimonial</button>
+      <button class="btn-a" data-drawer-close>Cancel</button>
+    </div>
+  </div>
+</aside>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+  var drawer = document.querySelector('[data-drawer]');
+  var backdrop = document.querySelector('[data-drawer-backdrop]');
+  var rows = <%- JSON.stringify(testimonials) %>;
+  var editingId = null;
+
+  function field(n) { return drawer.querySelector('[data-field="' + n + '"]'); }
+  function setPreview(url) {
+    var p = drawer.querySelector('[data-preview]');
+    p.style.backgroundImage = url ? "url('" + url.replace(/'/g, "\\'") + "')" : '';
+    p.innerHTML = url ? '' : '<i class="fa fa-user"></i>';
+  }
+  function open(row) {
+    editingId = row ? row.id : null;
+    drawer.querySelector('[data-drawer-title]').textContent = row ? 'Edit testimonial' : 'New testimonial';
+    var t = row || { name: '', location: '', review: '', rating: 5, imageUrl: '', order: rows.length + 1, isActive: true };
+    ['name','location','review','rating','imageUrl','order'].forEach(function (k) {
+      field(k).value = t[k] == null ? '' : t[k];
+    });
+    field('isActive').checked = t.isActive !== false;
+    setPreview(t.imageUrl);
+    drawer.classList.add('open'); backdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+  function close() {
+    drawer.classList.remove('open'); backdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  drawer.querySelectorAll('[data-drawer-close]').forEach(function (b) { b.addEventListener('click', close); });
+  backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  drawer.querySelector('[data-media-picker]').addEventListener('change', function () {
+    if (!this.value) return;
+    field('imageUrl').value = this.value; setPreview(this.value); this.value = '';
+  });
+  field('imageUrl').addEventListener('input', function () { setPreview(this.value); });
+
+  document.querySelector('[data-new]').addEventListener('click', function () { open(null); });
+  document.querySelectorAll('[data-edit]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var id = Number(b.getAttribute('data-edit'));
+      open(rows.filter(function (r) { return r.id === id; })[0]);
+    });
+  });
+  document.querySelectorAll('[data-delete]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      A.api('DELETE', '/api/admin/testimonials/' + b.getAttribute('data-delete'))
+        .then(function () { A.toast('Testimonial deleted', 'ok'); setTimeout(function () { location.reload(); }, 500); })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  });
+
+  drawer.querySelector('[data-save]').addEventListener('click', function () {
+    var payload = {
+      name: field('name').value.trim(),
+      location: field('location').value.trim(),
+      review: field('review').value.trim(),
+      rating: Number(field('rating').value) || 0,
+      imageUrl: field('imageUrl').value.trim(),
+      order: Number(field('order').value) || 0,
+      isActive: field('isActive').checked,
+    };
+    if (payload.name.length < 2) { A.toast('Name is required.', 'err'); return; }
+    if (payload.review.length < 2) { A.toast('Review is required.', 'err'); return; }
+
+    (editingId
+      ? A.api('PUT', '/api/admin/testimonials/' + editingId, payload)
+      : A.api('POST', '/api/admin/testimonials', payload))
+      .then(function () {
+        A.toast('Testimonial saved — the website is updated.', 'ok');
+        setTimeout(function () { location.reload(); }, 600);
+      })
+      .catch(function (e) { A.toast(e.message, 'err'); });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

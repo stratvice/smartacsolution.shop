@@ -1,0 +1,218 @@
+// Prisma schema — 24x7 Customer Support
+// Datasource: PostgreSQL. Connection string comes from env (never committed).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- Admin
+
+model Admin {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  username     String    @unique
+  passwordHash String
+  name         String?
+  role         String    @default("ADMIN")
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  leadNotes LeadNote[]
+
+  @@map("admins")
+}
+
+// ------------------------------------------------- Landing page content
+// One row per editable section of the public page. `content` is a JSON
+// payload whose shape is section-specific (see prisma/seed.js for the
+// defaults lifted from the original static page).
+
+model PageSection {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique // hero | about | why | process | services_header | testimonials_header | faq_header | contact | footer | topbar | ticker | seo
+  label     String // human-readable name shown in the admin UI
+  content   Json
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("page_sections")
+}
+
+// -------------------------------------------------------------- Services
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  description String
+  badge       String?
+  icon        String   @default("fa fa-snowflake")
+  iconStyle   String? // optional inline gradient override, preserves original look
+  imageUrl    String?
+  imageAlt    String?
+  buttonText  String   @default("Call Now")
+  buttonLink  String   @default("#contact")
+  buttonIcon  String   @default("fab fa-whatsapp")
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, order])
+  @@map("services")
+}
+
+// ---------------------------------------------------------- Testimonials
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String?
+  review    String
+  rating    Float    @default(5)
+  imageUrl  String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+  @@map("testimonials")
+}
+
+// ------------------------------------------------------------------ FAQ
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, order])
+  @@map("faqs")
+}
+
+// ----------------------------------------------------------------- Leads
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  CONVERTED
+  CLOSED
+}
+
+// Outcome of the "new lead" email notification for a single lead.
+// NOT_ATTEMPTED covers both "notifications are switched off" and
+// "no recipients configured" — the lead is saved either way.
+enum NotifyStatus {
+  NOT_ATTEMPTED
+  SENT
+  FAILED
+}
+
+model Lead {
+  id          Int        @id @default(autoincrement())
+  name        String
+  phone       String
+  email       String?
+  service     String?
+  message     String?
+  city        String?
+  state       String?
+  country     String?
+  latitude    Float?
+  longitude   Float?
+  locationSrc String? // gps | ip | manual | null
+  source      String     @default("website")
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  status      LeadStatus @default(NEW)
+  notes       String?
+  // Email-notification outcome. Purely informational: a failure here never
+  // affects the lead itself.
+  notifyStatus     NotifyStatus @default(NOT_ATTEMPTED)
+  notifyAt         DateTime?
+  notifyRecipients String? // who it went to, for the admin's reference
+  notifyError      String? // short, sanitised reason — never a credential
+  ipAddress   String?
+  userAgent   String?
+  pageUrl     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  leadNotes LeadNote[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([city])
+  @@index([service])
+  @@map("leads")
+}
+
+// Timestamped note history on a lead (the admin note trail).
+model LeadNote {
+  id        Int      @id @default(autoincrement())
+  leadId    Int
+  adminId   Int?
+  body      String
+  createdAt DateTime @default(now())
+
+  lead  Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  admin Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([leadId])
+  @@map("lead_notes")
+}
+
+// ----------------------------------------------------------------- Media
+// Binaries live in cloud storage (or the local uploads dir in dev).
+// Only the URL + metadata are persisted here.
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  url       String
+  publicId  String? // storage provider handle, used for replace/delete
+  provider  String   @default("local") // cloudinary | local
+  filename  String
+  mimeType  String?
+  size      Int?
+  width     Int?
+  height    Int?
+  alt       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("media")
+}
+
+// --------------------------------------------------------- Site settings
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @default("")
+  group     String   @default("general") // general | contact | social | seo | cta | location
+  label     String   @default("")
+  type      String   @default("text") // text | textarea | url | tel | email | image
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([group, order])
+  @@map("site_settings")
+}

@@ -1,0 +1,359 @@
+<%
+  function qs(overrides) {
+    var params = new URLSearchParams();
+    var base = Object.assign({}, query, overrides || {});
+    Object.keys(base).forEach(function (k) {
+      if (base[k] !== undefined && base[k] !== null && base[k] !== '') params.set(k, base[k]);
+    });
+    var s = params.toString();
+    return s ? '?' + s : '';
+  }
+  var page = filters.page || 1;
+%>
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="card-admin">
+  <header>
+    <h2>Filters</h2>
+    <div class="spacer"></div>
+    <a class="btn-a btn-sm-a btn-teal-a" href="/api/admin/leads/export<%= qs({ page: '' }) %>">
+      <i class="fa fa-file-csv"></i> Export CSV
+    </a>
+  </header>
+  <div class="card-body">
+    <form method="get" action="/admin/leads" class="filters">
+      <div class="field grow">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" value="<%= filters.q || '' %>" placeholder="Name, phone, email, message, city"/>
+      </div>
+      <div class="field">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="">All statuses</option>
+          <% STATUSES.forEach(function (s) { %>
+          <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="service">Service</label>
+        <select id="service" name="service">
+          <option value="">All services</option>
+          <% serviceOptions.forEach(function (s) { %>
+          <option value="<%= s %>" <%= filters.service === s ? 'selected' : '' %>><%= s %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="city">Location</label>
+        <select id="city" name="city">
+          <option value="">All locations</option>
+          <% cityOptions.forEach(function (c) { %>
+          <option value="<%= c %>" <%= filters.city === c ? 'selected' : '' %>><%= c %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="from">From</label>
+        <input type="date" id="from" name="from" value="<%= filters.from || '' %>"/>
+      </div>
+      <div class="field">
+        <label for="to">To</label>
+        <input type="date" id="to" name="to" value="<%= filters.to || '' %>"/>
+      </div>
+      <div class="field">
+        <button type="submit" class="btn-a btn-navy-a"><i class="fa fa-filter"></i> Apply</button>
+      </div>
+      <div class="field">
+        <a href="/admin/leads" class="btn-a"><i class="fa fa-rotate-left"></i> Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card-admin">
+  <header>
+    <h2><%= total %> lead<%= total === 1 ? '' : 's' %></h2>
+    <div class="spacer"></div>
+    <span class="muted" style="font-size:.82rem;">Page <%= page %> of <%= pages %></span>
+  </header>
+
+  <% if (!leads.length) { %>
+    <div class="empty-state">
+      <i class="fa fa-inbox"></i>
+      No leads match these filters.
+    </div>
+  <% } else { %>
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Service</th>
+          <th>Location</th>
+          <th>Source</th>
+          <th>Status</th>
+          <th class="nowrap">Received</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% leads.forEach(function (l) {
+             var digits = String(l.phone || '').replace(/[^\d+]/g, '');
+             var wa = digits.replace(/^\+/, '');
+        %>
+        <tr data-lead-row="<%= l.id %>">
+          <td>
+            <strong><%= l.name %></strong>
+            <% if (l.email) { %><div class="muted" style="font-size:.78rem;"><%= l.email %></div><% } %>
+          </td>
+          <td class="nowrap"><a href="tel:<%= digits %>"><%= l.phone %></a></td>
+          <td><%= l.service || '—' %></td>
+          <td>
+            <%= [l.city, l.state].filter(Boolean).join(', ') || '—' %>
+            <% if (l.locationSrc) { %><div class="muted" style="font-size:.72rem;">via <%= l.locationSrc %></div><% } %>
+          </td>
+          <td>
+            <span class="pill"><%= l.source %></span>
+            <% if (l.utmSource) { %><div class="muted" style="font-size:.72rem;"><%= l.utmSource %><%= l.utmCampaign ? ' / ' + l.utmCampaign : '' %></div><% } %>
+          </td>
+          <td>
+            <select class="badge-select" data-status-select="<%= l.id %>" style="padding:4px 8px;font-size:.76rem;font-weight:700;border-radius:999px;">
+              <% STATUSES.forEach(function (s) { %>
+              <option value="<%= s %>" <%= l.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }); %>
+            </select>
+          </td>
+          <td class="nowrap muted"><%= new Date(l.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></td>
+          <td class="nowrap">
+            <div class="btn-row">
+              <button class="btn-a btn-sm-a btn-icon" title="View details" data-open-lead="<%= l.id %>"><i class="fa fa-eye"></i></button>
+              <a class="btn-a btn-sm-a btn-icon" title="Call" href="tel:<%= digits %>"><i class="fa fa-phone"></i></a>
+              <a class="btn-a btn-sm-a btn-icon" title="WhatsApp" target="_blank" rel="noopener"
+                 href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Hello ' + l.name + ', thank you for contacting 24x7 Customer Support regarding ' + (l.service || 'your enquiry') + '.') %>"><i class="fab fa-whatsapp"></i></a>
+              <button class="btn-a btn-sm-a btn-icon btn-danger-a" title="Delete"
+                      data-delete-lead="<%= l.id %>" data-confirm="Delete this lead permanently? This cannot be undone."><i class="fa fa-trash"></i></button>
+            </div>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (pages > 1) { %>
+  <div class="pager">
+    <% if (page > 1) { %><a href="<%= qs({ page: page - 1 }) %>">Previous</a><% } %>
+    <%
+      var start = Math.max(1, page - 2), end = Math.min(pages, page + 2);
+      if (start > 1) { %><a href="<%= qs({ page: 1 }) %>">1</a><% if (start > 2) { %><span class="dots">…</span><% } } %>
+    <% for (var p = start; p <= end; p++) { %>
+      <% if (p === page) { %><span class="current"><%= p %></span><% } else { %><a href="<%= qs({ page: p }) %>"><%= p %></a><% } %>
+    <% } %>
+    <% if (end < pages) { if (end < pages - 1) { %><span class="dots">…</span><% } %><a href="<%= qs({ page: pages }) %>"><%= pages %></a><% } %>
+    <% if (page < pages) { %><a href="<%= qs({ page: page + 1 }) %>">Next</a><% } %>
+  </div>
+  <% } %>
+  <% } %>
+</div>
+
+<!-- Lead detail drawer -->
+<div class="drawer-backdrop" data-drawer-backdrop></div>
+<aside class="drawer" data-drawer aria-hidden="true">
+  <header>
+    <h2>Lead details</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-icon" data-drawer-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+  </header>
+  <div class="drawer-body" data-drawer-body>
+    <p class="muted">Loading…</p>
+  </div>
+  <div class="drawer-foot">
+    <div class="btn-row">
+      <a class="btn-a btn-teal-a" data-drawer-call href="#"><i class="fa fa-phone"></i> Call</a>
+      <a class="btn-a" data-drawer-wa href="#" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+    </div>
+  </div>
+</aside>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+  var drawer = document.querySelector('[data-drawer]');
+  var backdrop = document.querySelector('[data-drawer-backdrop]');
+  var body = document.querySelector('[data-drawer-body]');
+  var STATUSES = <%- JSON.stringify(STATUSES) %>;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtDate(d) {
+    return d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  }
+  function openDrawer() {
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  document.querySelectorAll('[data-drawer-close]').forEach(function (b) {
+    b.addEventListener('click', closeDrawer);
+  });
+  backdrop.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+
+  function render(lead) {
+    var digits = String(lead.phone || '').replace(/[^\d+]/g, '');
+    document.querySelector('[data-drawer-call]').href = 'tel:' + digits;
+    document.querySelector('[data-drawer-wa]').href =
+      'https://wa.me/' + digits.replace(/^\+/, '') +
+      '?text=' + encodeURIComponent('Hello ' + lead.name + ', thank you for contacting 24x7 Customer Support.');
+
+    var notes = (lead.leadNotes || []).map(function (n) {
+      var who = n.admin ? (n.admin.name || n.admin.username) : 'system';
+      return '<div class="note-item">' + esc(n.body).replace(/\n/g, '<br/>') +
+             '<div class="note-meta">' + esc(who) + ' · ' + fmtDate(n.createdAt) + '</div></div>';
+    }).join('') || '<p class="muted">No notes yet.</p>';
+
+    // Whether the "new lead" email went out. Informational only — a failure
+    // here never affects the lead itself.
+    function notifyCell(l) {
+      var state = l.notifyStatus || 'NOT_ATTEMPTED';
+      var colour = state === 'SENT' ? 'var(--green)' : state === 'FAILED' ? 'var(--red)' : 'var(--muted)';
+      var label = state === 'SENT' ? '✓ Sent' : state === 'FAILED' ? '✕ Failed' : '— Not attempted';
+      var out = '<strong style="color:' + colour + ';">' + label + '</strong>';
+      if (l.notifyAt) out += ' <span class="muted">· ' + fmtDate(l.notifyAt) + '</span>';
+      if (l.notifyRecipients) {
+        out += '<div class="muted" style="font-size:.78rem;margin-top:2px;">to ' +
+               esc(l.notifyRecipients.split('\n').join(', ')) + '</div>';
+      }
+      if (l.notifyError) {
+        out += '<div class="muted" style="font-size:.78rem;margin-top:2px;color:var(--red);">' +
+               esc(l.notifyError) + '</div>';
+      }
+      return out;
+    }
+
+    var statusOptions = STATUSES.map(function (s) {
+      return '<option value="' + s + '"' + (lead.status === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    body.innerHTML =
+      '<dl class="kv">' +
+        '<dt>Name</dt><dd><strong>' + esc(lead.name) + '</strong></dd>' +
+        '<dt>Phone</dt><dd><a href="tel:' + esc(digits) + '">' + esc(lead.phone) + '</a></dd>' +
+        '<dt>Email</dt><dd>' + (lead.email ? '<a href="mailto:' + esc(lead.email) + '">' + esc(lead.email) + '</a>' : '—') + '</dd>' +
+        '<dt>Service</dt><dd>' + esc(lead.service || '—') + '</dd>' +
+        '<dt>Message</dt><dd>' + (lead.message ? esc(lead.message).replace(/\n/g, '<br/>') : '—') + '</dd>' +
+        '<dt>City</dt><dd>' + esc(lead.city || '—') + '</dd>' +
+        '<dt>State</dt><dd>' + esc(lead.state || '—') + '</dd>' +
+        '<dt>Country</dt><dd>' + esc(lead.country || '—') + '</dd>' +
+        '<dt>Coordinates</dt><dd>' + (lead.latitude != null ? esc(lead.latitude + ', ' + lead.longitude) : '—') + '</dd>' +
+        '<dt>Location via</dt><dd>' + esc(lead.locationSrc || '—') + '</dd>' +
+        '<dt>Source</dt><dd>' + esc(lead.source || '—') + '</dd>' +
+        '<dt>UTM source</dt><dd>' + esc(lead.utmSource || '—') + '</dd>' +
+        '<dt>UTM medium</dt><dd>' + esc(lead.utmMedium || '—') + '</dd>' +
+        '<dt>UTM campaign</dt><dd>' + esc(lead.utmCampaign || '—') + '</dd>' +
+        '<dt>Page</dt><dd style="word-break:break-all;">' + esc(lead.pageUrl || '—') + '</dd>' +
+        '<dt>Created</dt><dd>' + fmtDate(lead.createdAt) + '</dd>' +
+        '<dt>Updated</dt><dd>' + fmtDate(lead.updatedAt) + '</dd>' +
+        '<dt>Email notification</dt><dd>' + notifyCell(lead) + '</dd>' +
+      '</dl>' +
+      '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0;"/>' +
+      '<div class="field"><label>Status</label>' +
+        '<select data-drawer-status>' + statusOptions + '</select></div>' +
+      '<div class="field"><label>Notes field</label>' +
+        '<textarea data-drawer-notes rows="3" placeholder="Free-text notes stored on the lead">' + esc(lead.notes || '') + '</textarea>' +
+        '<button class="btn-a btn-sm-a btn-navy-a" style="margin-top:8px;" data-drawer-save-notes><i class="fa fa-floppy-disk"></i> Save notes</button>' +
+      '</div>' +
+      '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0;"/>' +
+      '<h3 style="font-size:1.05rem;margin-bottom:10px;">Note history</h3>' +
+      '<div data-notes-list>' + notes + '</div>' +
+      '<div class="field" style="margin-top:12px;">' +
+        '<textarea data-new-note rows="2" placeholder="Add a note…"></textarea>' +
+        '<button class="btn-a btn-sm-a btn-teal-a" style="margin-top:8px;" data-add-note><i class="fa fa-plus"></i> Add note</button>' +
+      '</div>';
+
+    // --- wire the drawer controls
+    body.querySelector('[data-drawer-status]').addEventListener('change', function () {
+      var value = this.value;
+      A.api('PATCH', '/api/admin/leads/' + lead.id, { status: value })
+        .then(function () {
+          A.toast('Status updated to ' + value, 'ok');
+          var row = document.querySelector('[data-status-select="' + lead.id + '"]');
+          if (row) row.value = value;
+        })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+
+    body.querySelector('[data-drawer-save-notes]').addEventListener('click', function () {
+      var notesValue = body.querySelector('[data-drawer-notes]').value;
+      A.api('PATCH', '/api/admin/leads/' + lead.id, { notes: notesValue })
+        .then(function () { A.toast('Notes saved', 'ok'); })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+
+    body.querySelector('[data-add-note]').addEventListener('click', function () {
+      var input = body.querySelector('[data-new-note]');
+      var text = input.value.trim();
+      if (!text) { A.toast('Write something first.', 'err'); return; }
+      A.api('POST', '/api/admin/leads/' + lead.id + '/notes', { body: text })
+        .then(function () {
+          input.value = '';
+          A.toast('Note added', 'ok');
+          load(lead.id); // refresh the history
+        })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  }
+
+  function load(id) {
+    body.innerHTML = '<p class="muted">Loading…</p>';
+    openDrawer();
+    A.api('GET', '/api/admin/leads/' + id)
+      .then(render)
+      .catch(function (e) {
+        body.innerHTML = '<p class="muted">' + esc(e.message) + '</p>';
+      });
+  }
+
+  document.querySelectorAll('[data-open-lead]').forEach(function (btn) {
+    btn.addEventListener('click', function () { load(btn.getAttribute('data-open-lead')); });
+  });
+
+  // Inline status change straight from the table.
+  document.querySelectorAll('[data-status-select]').forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      var id = sel.getAttribute('data-status-select');
+      A.api('PATCH', '/api/admin/leads/' + id, { status: sel.value })
+        .then(function () { A.toast('Status updated to ' + sel.value, 'ok'); })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  });
+
+  document.querySelectorAll('[data-delete-lead]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-delete-lead');
+      A.api('DELETE', '/api/admin/leads/' + id)
+        .then(function () {
+          var row = document.querySelector('[data-lead-row="' + id + '"]');
+          if (row) row.remove();
+          A.toast('Lead deleted', 'ok');
+        })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

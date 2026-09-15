@@ -1,0 +1,166 @@
+/**
+ * Contact form -> POST /api/leads.
+ * Client-side validation mirrors the server rules; the server remains the
+ * authority. Preserves the original button feedback animation.
+ */
+(function () {
+  'use strict';
+
+  var form = document.getElementById('leadForm');
+  if (!form) return;
+
+  var msgBox = document.getElementById('leadFormMsg');
+  var button = form.querySelector('.btn-submit');
+  var originalHtml = button ? button.innerHTML : '';
+  var submitting = false;
+
+  function setMessage(text, kind) {
+    if (!msgBox) return;
+    msgBox.textContent = text || '';
+    msgBox.style.cssText = text
+      ? 'font-size:0.9rem;font-weight:600;padding:12px 14px;border-radius:10px;' +
+        (kind === 'error'
+          ? 'color:#b42318;background:rgba(180,35,24,0.08);border:1px solid rgba(180,35,24,0.25);'
+          : 'color:#067647;background:rgba(37,211,102,0.10);border:1px solid rgba(37,211,102,0.35);')
+      : '';
+  }
+
+  function clearFieldErrors() {
+    form.querySelectorAll('.is-invalid').forEach(function (el) {
+      el.classList.remove('is-invalid');
+    });
+    form.querySelectorAll('.invalid-feedback').forEach(function (el) {
+      el.textContent = '';
+      el.style.display = 'none';
+    });
+  }
+
+  function showFieldError(name, message) {
+    var field = form.querySelector('[name="' + name + '"]');
+    if (!field) return false;
+    field.classList.add('is-invalid');
+    var fb = field.parentElement.querySelector('.invalid-feedback');
+    if (fb) {
+      fb.textContent = message;
+      fb.style.cssText = 'display:block;color:#b42318;font-size:0.8rem;margin-top:4px;';
+    }
+    return true;
+  }
+
+  /** Mirrors the zod rules on the server. */
+  function validate(data) {
+    var errors = [];
+    if (!data.name || data.name.trim().length < 2) {
+      errors.push(['name', 'Please enter your name.']);
+    }
+    if (!data.phone || !/^[+\d][\d\s\-().]{6,}$/.test(data.phone.trim())) {
+      errors.push(['phone', 'Please enter a valid phone number.']);
+    }
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email.trim())) {
+      errors.push(['email', 'Please enter a valid email.']);
+    }
+    return errors;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (submitting) return;
+
+    clearFieldErrors();
+    setMessage('');
+
+    var fd = new FormData(form);
+    var data = {};
+    fd.forEach(function (value, key) {
+      data[key] = typeof value === 'string' ? value.trim() : value;
+    });
+    data.pageUrl = window.location.href;
+
+    // Attach whatever the geolocation script resolved, if anything.
+    var loc = window.__visitorLocation;
+    if (loc) {
+      if (!data.city) data.city = loc.city || '';
+      if (!data.state) data.state = loc.state || '';
+      if (!data.country) data.country = loc.country || '';
+      if (!data.locationSrc) data.locationSrc = loc.source || '';
+      if (!data.latitude && loc.latitude != null) data.latitude = loc.latitude;
+      if (!data.longitude && loc.longitude != null) data.longitude = loc.longitude;
+    }
+    // Empty strings would fail the numeric coercion server-side.
+    if (!data.latitude) delete data.latitude;
+    if (!data.longitude) delete data.longitude;
+    if (!data.locationSrc) delete data.locationSrc;
+
+    var errors = validate(data);
+    if (errors.length) {
+      errors.forEach(function (pair) {
+        showFieldError(pair[0], pair[1]);
+      });
+      setMessage('Please correct the highlighted fields.', 'error');
+      return;
+    }
+
+    submitting = true;
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<i class="fa fa-circle-notch fa-spin me-2"></i>Sending…';
+    }
+
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          return { ok: res.ok, status: res.status, body: body };
+        });
+      })
+      .then(function (result) {
+        if (result.ok) {
+          form.reset();
+          clearFieldErrors();
+          setMessage(
+            result.body.message || "Thank you! We've received your request and will call you back shortly.",
+            'success'
+          );
+          if (button) {
+            button.innerHTML = '<i class="fa fa-check me-2"></i>Message Sent!';
+            button.style.background = '#25D366';
+            setTimeout(function () {
+              button.innerHTML = originalHtml;
+              button.style.background = '';
+            }, 3000);
+          }
+          return;
+        }
+
+        // Field-level errors from the server land on the right inputs.
+        var handled = false;
+        if (result.body && Array.isArray(result.body.details)) {
+          result.body.details.forEach(function (d) {
+            if (showFieldError(d.field, d.message)) handled = true;
+          });
+        }
+        setMessage(
+          handled
+            ? 'Please correct the highlighted fields.'
+            : result.body && result.body.error
+              ? result.body.error
+              : 'Could not send your message. Please call us instead.',
+          'error'
+        );
+      })
+      .catch(function () {
+        setMessage('Network error — please check your connection or call us directly.', 'error');
+      })
+      .finally(function () {
+        submitting = false;
+        if (button) {
+          button.disabled = false;
+          if (button.innerHTML.indexOf('fa-spin') !== -1) button.innerHTML = originalHtml;
+        }
+      });
+  });
+})();

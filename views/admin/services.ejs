@@ -1,0 +1,235 @@
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="card-admin">
+  <header>
+    <h2>Services</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-primary-a" data-new-service><i class="fa fa-plus"></i> Add service</button>
+    <p>Each service renders as a card in the Services section. Drag order is controlled by the Order field; disabled services are hidden from the website.</p>
+  </header>
+
+  <div class="card-body">
+    <div id="serviceList">
+      <% if (!services.length) { %>
+        <div class="empty-state"><i class="fa fa-screwdriver-wrench"></i> No services yet.</div>
+      <% } %>
+      <% services.forEach(function (s) { %>
+      <div class="repeat-item" data-service="<%= s.id %>">
+        <div class="repeat-head">
+          <strong data-repeat-index>#<%= s.order %></strong>
+          <span class="pill <%= s.isActive ? 'on' : 'off' %>"><%= s.isActive ? 'Live' : 'Hidden' %></span>
+          <div class="spacer"></div>
+          <button class="btn-a btn-sm-a" data-edit-service="<%= s.id %>"><i class="fa fa-pen"></i> Edit</button>
+          <button class="btn-a btn-sm-a btn-danger-a" data-delete-service="<%= s.id %>"
+                  data-confirm="Delete the service &quot;<%= s.title %>&quot;? This removes it from the website.">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div class="preview" style="width:76px;height:76px;flex:0 0 76px;border-radius:9px;border:1px solid var(--line);background:#f1f5f8 center/cover no-repeat;<% if (s.imageUrl) { %>background-image:url('<%= s.imageUrl %>');<% } %>"></div>
+          <div style="min-width:0;">
+            <div style="font-weight:700;font-size:1rem;"><%= s.title %> <% if (s.badge) { %><span class="pill"><%= s.badge %></span><% } %></div>
+            <div class="muted" style="font-size:.83rem;margin-top:4px;"><%= s.description.slice(0, 170) %><%= s.description.length > 170 ? '…' : '' %></div>
+            <div class="muted" style="font-size:.76rem;margin-top:6px;">
+              <i class="<%= s.icon %>"></i> <%= s.icon %> &nbsp;·&nbsp; Button: <strong><%= s.buttonText %></strong> → <%= s.buttonLink %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<!-- Editor drawer -->
+<div class="drawer-backdrop" data-drawer-backdrop></div>
+<aside class="drawer" data-drawer aria-hidden="true">
+  <header>
+    <h2 data-drawer-title>Service</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-icon" data-drawer-close aria-label="Close"><i class="fa fa-xmark"></i></button>
+  </header>
+  <div class="drawer-body">
+    <input type="hidden" data-field="id"/>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" data-field="title" maxlength="160"/>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea data-field="description" rows="6" maxlength="4000"></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Badge <span class="hint">(e.g. Most Popular — leave blank for none)</span></label>
+        <input type="text" data-field="badge" maxlength="60"/>
+      </div>
+      <div class="field">
+        <label>Icon class</label>
+        <input type="text" data-field="icon" maxlength="80" placeholder="fa fa-snowflake"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Image</label>
+      <div class="image-picker">
+        <div class="preview" data-preview><i class="fa fa-image"></i></div>
+        <div class="picker-body">
+          <input type="text" data-field="imageUrl" data-image-input placeholder="/images/example.webp or https://…"/>
+          <div class="btn-row" style="margin-top:7px;">
+            <select data-media-picker style="max-width:230px;">
+              <option value="">Pick from media library…</option>
+              <% media.forEach(function (m) { %>
+              <option value="<%= m.url %>"><%= m.filename %></option>
+              <% }); %>
+            </select>
+            <a class="btn-a btn-sm-a" href="/admin/media" target="_blank"><i class="fa fa-upload"></i> Upload</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Image alt text</label>
+      <input type="text" data-field="imageAlt" maxlength="200"/>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Button text</label>
+        <input type="text" data-field="buttonText" maxlength="60"/>
+      </div>
+      <div class="field">
+        <label>Button icon</label>
+        <input type="text" data-field="buttonIcon" maxlength="80" placeholder="fab fa-whatsapp"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Button link</label>
+      <input type="text" data-field="buttonLink" maxlength="600" placeholder="tel:+919272525956 · https://wa.me/… · #contact"/>
+      <div class="hint">Supports internal anchors (#contact), full URLs, tel: and WhatsApp links.</div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Display order</label>
+        <input type="number" data-field="order" min="0" max="9999"/>
+      </div>
+      <div class="field">
+        <label>Visible</label>
+        <label class="check"><input type="checkbox" data-field="isActive"/> Show on website</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Icon background override <span class="hint">(advanced — CSS)</span></label>
+      <input type="text" data-field="iconStyle" maxlength="300" placeholder="background: linear-gradient(135deg, var(--teal), var(--teal-dark))"/>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="btn-row">
+      <button class="btn-a btn-primary-a" data-save-service><i class="fa fa-floppy-disk"></i> Save service</button>
+      <button class="btn-a" data-drawer-close>Cancel</button>
+    </div>
+  </div>
+</aside>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+  var drawer = document.querySelector('[data-drawer]');
+  var backdrop = document.querySelector('[data-drawer-backdrop]');
+  var services = <%- JSON.stringify(services) %>;
+  var editingId = null;
+
+  function field(name) { return drawer.querySelector('[data-field="' + name + '"]'); }
+
+  function setPreview(url) {
+    var p = drawer.querySelector('[data-preview]');
+    p.style.backgroundImage = url ? "url('" + url.replace(/'/g, "\\'") + "')" : '';
+    p.innerHTML = url ? '' : '<i class="fa fa-image"></i>';
+  }
+
+  function open(service) {
+    editingId = service ? service.id : null;
+    drawer.querySelector('[data-drawer-title]').textContent = service ? 'Edit service' : 'New service';
+    var s = service || {
+      title: '', description: '', badge: '', icon: 'fa fa-snowflake', iconStyle: '',
+      imageUrl: '', imageAlt: '', buttonText: 'Call Now', buttonIcon: 'fab fa-whatsapp',
+      buttonLink: '#contact', order: services.length + 1, isActive: true,
+    };
+    ['title','description','badge','icon','iconStyle','imageUrl','imageAlt','buttonText','buttonIcon','buttonLink','order']
+      .forEach(function (k) { field(k).value = s[k] == null ? '' : s[k]; });
+    field('isActive').checked = s.isActive !== false;
+    setPreview(s.imageUrl);
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  function close() {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  drawer.querySelectorAll('[data-drawer-close]').forEach(function (b) { b.addEventListener('click', close); });
+  backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  drawer.querySelector('[data-media-picker]').addEventListener('change', function () {
+    if (!this.value) return;
+    field('imageUrl').value = this.value;
+    setPreview(this.value);
+    this.value = '';
+  });
+  field('imageUrl').addEventListener('input', function () { setPreview(this.value); });
+
+  document.querySelector('[data-new-service]').addEventListener('click', function () { open(null); });
+
+  document.querySelectorAll('[data-edit-service]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = Number(btn.getAttribute('data-edit-service'));
+      open(services.filter(function (s) { return s.id === id; })[0]);
+    });
+  });
+
+  document.querySelectorAll('[data-delete-service]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-delete-service');
+      A.api('DELETE', '/api/admin/services/' + id)
+        .then(function () { A.toast('Service deleted', 'ok'); setTimeout(function () { location.reload(); }, 500); })
+        .catch(function (e) { A.toast(e.message, 'err'); });
+    });
+  });
+
+  drawer.querySelector('[data-save-service]').addEventListener('click', function () {
+    var payload = {
+      title: field('title').value.trim(),
+      description: field('description').value.trim(),
+      badge: field('badge').value.trim(),
+      icon: field('icon').value.trim(),
+      iconStyle: field('iconStyle').value.trim(),
+      imageUrl: field('imageUrl').value.trim(),
+      imageAlt: field('imageAlt').value.trim(),
+      buttonText: field('buttonText').value.trim(),
+      buttonIcon: field('buttonIcon').value.trim(),
+      buttonLink: field('buttonLink').value.trim(),
+      order: Number(field('order').value) || 0,
+      isActive: field('isActive').checked,
+    };
+    if (payload.title.length < 2) { A.toast('Title is required.', 'err'); return; }
+    if (payload.description.length < 2) { A.toast('Description is required.', 'err'); return; }
+
+    var req = editingId
+      ? A.api('PUT', '/api/admin/services/' + editingId, payload)
+      : A.api('POST', '/api/admin/services', payload);
+
+    req
+      .then(function () {
+        A.toast('Service saved — the website is updated.', 'ok');
+        setTimeout(function () { location.reload(); }, 600);
+      })
+      .catch(function (e) { A.toast(e.message, 'err'); });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

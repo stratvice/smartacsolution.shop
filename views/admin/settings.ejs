@@ -1,0 +1,307 @@
+<%
+  var GROUP_META = {
+    general:  { title: 'Company',        icon: 'fa fa-building',   blurb: 'Name, logo and favicon used across the website.' },
+    contact:  { title: 'Contact',        icon: 'fa fa-address-book', blurb: 'Used in the top bar, contact section, footer and every call/WhatsApp link.' },
+    social:   { title: 'Social media',   icon: 'fa fa-share-nodes', blurb: 'Blank fields are hidden from the footer.' },
+    location: { title: 'Location',       icon: 'fa fa-location-dot', blurb: 'Fallback used when a visitor\'s location cannot be detected.' },
+    cta:      { title: 'Buttons & CTAs', icon: 'fa fa-hand-pointer', blurb: 'Text and destination for every site-wide call to action. Supports #anchors, URLs, tel: and WhatsApp links.' },
+    seo:      { title: 'SEO',            icon: 'fa fa-magnifying-glass-chart', blurb: 'Page title, meta description and Open Graph tags. Also drives robots.txt and sitemap.xml.' },
+  };
+  var ORDER = ['general', 'contact', 'cta', 'location', 'social', 'seo'];
+%>
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<form id="settingsForm">
+<% ORDER.forEach(function (g) { if (!groups[g]) return; var meta = GROUP_META[g] || { title: g, icon: 'fa fa-gear', blurb: '' }; %>
+  <div class="card-admin">
+    <header>
+      <h2><i class="<%= meta.icon %>"></i> <%= meta.title %></h2>
+      <p><%= meta.blurb %></p>
+    </header>
+    <div class="card-body">
+      <div class="<%= g === 'social' || g === 'location' ? 'grid-2' : '' %>">
+      <% groups[g].forEach(function (s) { %>
+        <div class="field">
+          <label for="set-<%= s.key %>"><%= s.label || s.key %></label>
+          <% if (s.type === 'textarea') { %>
+            <textarea id="set-<%= s.key %>" data-setting="<%= s.key %>" rows="3" maxlength="5000"><%= s.value %></textarea>
+          <% } else if (s.type === 'image') { %>
+            <div class="image-picker">
+              <div class="preview" data-preview style="<% if (s.value) { %>background-image:url('<%= s.value %>');<% } %>"><%- s.value ? '' : '<i class="fa fa-image"></i>' %></div>
+              <div class="picker-body">
+                <input type="text" id="set-<%= s.key %>" data-setting="<%= s.key %>" data-image-input value="<%= s.value %>" maxlength="600"/>
+                <div class="btn-row" style="margin-top:7px;">
+                  <select data-media-picker style="max-width:230px;">
+                    <option value="">Pick from media library…</option>
+                    <% media.forEach(function (m) { %>
+                    <option value="<%= m.url %>"><%= m.filename %></option>
+                    <% }); %>
+                  </select>
+                  <a class="btn-a btn-sm-a" href="/admin/media" target="_blank"><i class="fa fa-upload"></i> Upload</a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <input type="<%= s.type === 'tel' ? 'tel' : s.type === 'email' ? 'email' : 'text' %>"
+                   id="set-<%= s.key %>" data-setting="<%= s.key %>" value="<%= s.value %>" maxlength="5000"/>
+          <% } %>
+          <% if (s.key === 'whatsapp') { %><div class="hint">Digits with country code, e.g. +919272525956 — used to build every wa.me link.</div><% } %>
+          <% if (s.key === 'location_personalisation') { %><div class="hint">Set to <code>false</code> to stop swapping <code>{{city}}</code> into headings.</div><% } %>
+          <% if (s.key === 'seo_canonical_url') { %><div class="hint">Leave blank to use APP_URL. Also used as the sitemap base.</div><% } %>
+          <% if (s.key === 'seo_robots') { %><div class="hint">Use <code>noindex, nofollow</code> to hide the site from search engines (also updates robots.txt).</div><% } %>
+        </div>
+      <% }); %>
+      </div>
+    </div>
+  </div>
+<% }); %>
+
+  <div class="card-admin">
+    <header>
+      <h2><i class="fa fa-envelope-circle-check"></i> Lead Email Notifications</h2>
+      <p>Email every new enquiry to the people below. Changes take effect as soon as you save — no code change or redeploy needed.</p>
+    </header>
+    <div class="card-body">
+
+      <% if (!notify.transportReady) { %>
+      <div class="notice-warn" style="margin-bottom:16px;">
+        <i class="fa fa-triangle-exclamation"></i>
+        <div>
+          <strong>The email service is not configured on this server yet.</strong>
+          <div class="hint" style="margin-top:3px;"><%= notify.transportProblem %> Recipients can still be saved now; notifications start sending once the server is configured. Leads are always saved regardless.</div>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="field">
+        <label class="check" style="font-weight:700;">
+          <input type="checkbox" id="notifyEnabled" <%= notify.enabled ? 'checked' : '' %>/>
+          Send an email notification for every new lead
+        </label>
+        <div class="hint">Turn this off to stop all lead notification emails without losing your recipient list.</div>
+        <!-- Hidden mirrors: the generic settings form collects [data-setting]. -->
+        <input type="hidden" data-setting="<%= notify.enabledKey %>" id="notifyEnabledValue" value="<%= notify.enabled ? 'true' : 'false' %>"/>
+        <input type="hidden" data-setting="<%= notify.recipientsKey %>" id="notifyRecipientsValue" value="<%= notify.recipients.join('\n') %>"/>
+      </div>
+
+      <div class="field" data-repeat id="notifyRecipients">
+        <label>Notification emails</label>
+        <div class="hint" style="margin-bottom:8px;">Every address listed here receives the same notification. Maximum <%= notify.maxRecipients %>.</div>
+
+        <div data-repeat-list>
+          <% notify.recipients.forEach(function (address, i) { %>
+          <div class="repeat-item">
+            <div class="repeat-head">
+              <strong data-repeat-index>#<%= i + 1 %></strong>
+              <div class="spacer"></div>
+              <button type="button" class="btn-a btn-sm-a btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i> Remove</button>
+            </div>
+            <div class="field" style="margin:0;">
+              <input type="email" data-key="email" data-notify-email value="<%= address %>" maxlength="254" placeholder="name@example.com" autocomplete="off" spellcheck="false"/>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+
+        <template data-repeat-template>
+          <div class="repeat-item">
+            <div class="repeat-head">
+              <strong data-repeat-index>#</strong>
+              <div class="spacer"></div>
+              <button type="button" class="btn-a btn-sm-a btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i> Remove</button>
+            </div>
+            <div class="field" style="margin:0;">
+              <input type="email" data-key="email" data-notify-email value="" maxlength="254" placeholder="name@example.com" autocomplete="off" spellcheck="false"/>
+            </div>
+          </div>
+        </template>
+
+        <div class="btn-row" style="margin-top:10px;">
+          <button type="button" class="btn-a btn-sm-a btn-teal-a" data-repeat-add><i class="fa fa-plus"></i> Add Email</button>
+        </div>
+        <p class="muted" data-notify-empty style="<%= notify.recipients.length ? 'display:none;' : '' %>margin-top:10px;">
+          No recipients yet — add at least one address to receive lead notifications.
+        </p>
+      </div>
+
+      <div class="btn-row" style="margin-top:18px;">
+        <button type="button" class="btn-a btn-navy-a" id="notifyTest"><i class="fa fa-paper-plane"></i> Send Test Email</button>
+        <span class="hint" id="notifyTestResult" style="align-self:center;"></span>
+      </div>
+      <div class="hint" style="margin-top:6px;">Save your settings first — the test is sent to the recipients currently stored.</div>
+    </div>
+  </div>
+
+  <div class="card-admin">
+    <div class="card-body">
+      <div class="btn-row">
+        <button type="submit" class="btn-a btn-primary-a"><i class="fa fa-floppy-disk"></i> Save all settings</button>
+        <a class="btn-a" href="/" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Preview website</a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card-admin">
+  <header>
+    <h2><i class="fa fa-key"></i> Change your password</h2>
+    <p>Signed in as <strong><%= admin.username %></strong> (<%= admin.email %>).</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-3">
+      <div class="field">
+        <label>Current password</label>
+        <input type="password" id="pwCurrent" autocomplete="current-password"/>
+      </div>
+      <div class="field">
+        <label>New password</label>
+        <input type="password" id="pwNew" autocomplete="new-password"/>
+        <div class="hint">Min 10 chars, with upper, lower and a number.</div>
+      </div>
+      <div class="field">
+        <label>Confirm new password</label>
+        <input type="password" id="pwConfirm" autocomplete="new-password"/>
+      </div>
+    </div>
+    <button class="btn-a btn-navy-a" id="pwSave"><i class="fa fa-lock"></i> Update password</button>
+  </div>
+</div>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+
+  document.querySelectorAll('[data-media-picker]').forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      if (!this.value) return;
+      var picker = this.closest('.image-picker');
+      var input = picker.querySelector('[data-setting]');
+      var preview = picker.querySelector('[data-preview]');
+      input.value = this.value;
+      preview.style.backgroundImage = "url('" + this.value.replace(/'/g, "\\'") + "')";
+      preview.innerHTML = '';
+      this.value = '';
+    });
+  });
+
+  // ------------------------------------------------ lead email notifications
+  var EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,24}$/;
+  var enabledBox = document.getElementById('notifyEnabled');
+  var enabledValue = document.getElementById('notifyEnabledValue');
+  var recipientsValue = document.getElementById('notifyRecipientsValue');
+  var recipientsGroup = document.getElementById('notifyRecipients');
+  var emptyNote = document.querySelector('[data-notify-empty]');
+
+  /** Read the repeater rows into a list, flagging anything that is not an email. */
+  function readRecipients() {
+    var valid = [];
+    var invalid = [];
+    var seen = {};
+    recipientsGroup.querySelectorAll('[data-notify-email]').forEach(function (input) {
+      var address = (input.value || '').trim();
+      input.classList.remove('input-error');
+      if (!address) return;
+      if (!EMAIL_RE.test(address)) {
+        invalid.push(address);
+        input.classList.add('input-error');
+        return;
+      }
+      var key = address.toLowerCase();
+      if (seen[key]) return; // silently drop an exact duplicate
+      seen[key] = true;
+      valid.push(address);
+    });
+    return { valid: valid, invalid: invalid };
+  }
+
+  /** Mirror the visible controls into the hidden [data-setting] inputs. */
+  function syncNotify() {
+    var read = readRecipients();
+    enabledValue.value = enabledBox.checked ? 'true' : 'false';
+    recipientsValue.value = read.valid.join('\n');
+    if (emptyNote) emptyNote.style.display = read.valid.length ? 'none' : '';
+    return read;
+  }
+
+  enabledBox.addEventListener('change', syncNotify);
+  recipientsGroup.addEventListener('input', syncNotify);
+  recipientsGroup.addEventListener('click', function () { setTimeout(syncNotify, 0); });
+  syncNotify();
+
+  document.getElementById('notifyTest').addEventListener('click', function () {
+    var btn = this;
+    var out = document.getElementById('notifyTestResult');
+    var read = syncNotify();
+
+    if (read.invalid.length) {
+      out.textContent = '✕ Fix the highlighted email address first.';
+      out.style.color = 'var(--red)';
+      return;
+    }
+    if (!read.valid.length) {
+      out.textContent = '✕ Add at least one recipient, then save.';
+      out.style.color = 'var(--red)';
+      return;
+    }
+
+    btn.disabled = true;
+    out.textContent = 'Sending…';
+    out.style.color = 'var(--muted)';
+
+    A.api('POST', '/api/admin/notifications/test')
+      .then(function (r) {
+        out.textContent = '✓ Test email sent successfully to ' + r.recipients.join(', ');
+        out.style.color = 'var(--teal)';
+        A.toast('Test email sent successfully.', 'ok');
+      })
+      .catch(function (err) {
+        out.textContent = '✕ Test email failed: ' + err.message;
+        out.style.color = 'var(--red)';
+        A.toast('Test email failed: ' + err.message, 'err');
+      })
+      .finally(function () { btn.disabled = false; });
+  });
+
+  document.getElementById('settingsForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var read = syncNotify();
+    if (read.invalid.length) {
+      A.toast('Not a valid email address: ' + read.invalid.join(', '), 'err');
+      return;
+    }
+
+    var payload = {};
+    document.querySelectorAll('[data-setting]').forEach(function (el) {
+      payload[el.getAttribute('data-setting')] = el.value;
+    });
+    var btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    A.api('PUT', '/api/admin/settings', { settings: payload })
+      .then(function (r) { A.toast('Saved ' + r.updated + ' settings — the website is updated.', 'ok'); })
+      .catch(function (err) { A.toast(err.message, 'err'); })
+      .finally(function () { btn.disabled = false; });
+  });
+
+  document.getElementById('pwSave').addEventListener('click', function () {
+    var cur = document.getElementById('pwCurrent').value;
+    var next = document.getElementById('pwNew').value;
+    var confirmPw = document.getElementById('pwConfirm').value;
+    if (!cur || !next) { A.toast('Fill in both password fields.', 'err'); return; }
+    if (next !== confirmPw) { A.toast('New passwords do not match.', 'err'); return; }
+
+    A.api('POST', '/api/admin/account/password', { currentPassword: cur, newPassword: next })
+      .then(function () {
+        A.toast('Password updated.', 'ok');
+        document.getElementById('pwCurrent').value = '';
+        document.getElementById('pwNew').value = '';
+        document.getElementById('pwConfirm').value = '';
+      })
+      .catch(function (err) { A.toast(err.message, 'err'); });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

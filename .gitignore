@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+public/uploads/*
+!public/uploads/.gitkeep
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# local dev database + logs (PGlite)
+.pglite-data/
+.pglite.log
+.server.log

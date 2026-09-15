@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title><%= title %> · Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/admin/admin.css"/>
+</head>
+<body>
+<div class="admin-shell">
+  <div class="sidebar-backdrop"></div>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div>
+        <strong>24x7 <em>Support</em></strong>
+        <small>Admin Panel</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>"><i class="fa fa-gauge-high"></i> Dashboard</a>
+      <a href="/admin/leads" class="<%= active === 'leads' ? 'active' : '' %>"><i class="fa fa-inbox"></i> Leads</a>
+
+      <div class="nav-sep">Content</div>
+      <a href="/admin/landing-page" class="<%= active === 'landing-page' ? 'active' : '' %>"><i class="fa fa-window-maximize"></i> Landing Page</a>
+      <a href="/admin/services" class="<%= active === 'services' ? 'active' : '' %>"><i class="fa fa-screwdriver-wrench"></i> Services</a>
+      <a href="/admin/testimonials" class="<%= active === 'testimonials' ? 'active' : '' %>"><i class="fa fa-quote-left"></i> Testimonials</a>
+      <a href="/admin/faqs" class="<%= active === 'faqs' ? 'active' : '' %>"><i class="fa fa-circle-question"></i> FAQs</a>
+      <a href="/admin/media" class="<%= active === 'media' ? 'active' : '' %>"><i class="fa fa-images"></i> Media</a>
+
+      <div class="nav-sep">Configuration</div>
+      <a href="/admin/settings" class="<%= active === 'settings' ? 'active' : '' %>"><i class="fa fa-gear"></i> Settings</a>
+      <a href="/" target="_blank" rel="noopener"><i class="fa fa-arrow-up-right-from-square"></i> View Website</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="who">
+        <strong><%= admin && (admin.name || admin.username) || 'Admin' %></strong>
+        <%= admin ? admin.email : '' %>
+      </div>
+      <form method="post" action="/admin/logout">
+        <button type="submit" class="logout-btn"><i class="fa fa-right-from-bracket"></i> Logout</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar-admin">
+      <button class="hamburger" type="button" aria-label="Toggle navigation"><i class="fa fa-bars"></i></button>
+      <h1><%= title %></h1>
+      <div class="spacer"></div>
+      <%- typeof headerActions !== 'undefined' ? headerActions : '' %>
+    </header>
+    <main class="content">

@@ -1,0 +1,761 @@
+<%
+  function c(key) { return (byKey[key] && byKey[key].content) || {}; }
+  var hero = c('hero'), about = c('about'), why = c('why'), proc = c('process');
+  var svcHead = c('services_header'), testiHead = c('testimonials_header'), faqHead = c('faq_header');
+  var contact = c('contact'), footer = c('footer'), topbar = c('topbar'), ticker = c('ticker');
+  function v(o, k, d) { return o[k] === undefined || o[k] === null ? (d === undefined ? '' : d) : o[k]; }
+%>
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="card-admin">
+  <div class="card-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+    <i class="fa fa-circle-info" style="color:var(--teal);font-size:1.1rem;"></i>
+    <div style="flex:1;min-width:240px;font-size:.88rem;">
+      Every field here is live on the public site the moment you save.
+      Use <code>{{city}}</code>, <code>{{state}}</code> or <code>{{country}}</code> anywhere in a heading or description
+      to insert the visitor's detected location — e.g. <em>AC Repair Services in {{city}}</em>.
+    </div>
+    <a class="btn-a btn-sm-a" href="/" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Preview</a>
+  </div>
+</div>
+
+<!-- =============================================================== TOP BAR -->
+<div class="card-admin" data-section="topbar">
+  <header>
+    <h2><i class="fa fa-grip-lines"></i> Top Bar</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>Contact details themselves live in <a href="/admin/settings">Settings → Contact</a>.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label class="check"><input type="checkbox" data-key="showPhone" <%= v(topbar,'showPhone',true) !== false ? 'checked' : '' %>/> Show phone</label></div>
+      <div class="field"><label class="check"><input type="checkbox" data-key="showEmail" <%= v(topbar,'showEmail',true) !== false ? 'checked' : '' %>/> Show email</label></div>
+      <div class="field"><label class="check"><input type="checkbox" data-key="showLocation" <%= v(topbar,'showLocation',true) !== false ? 'checked' : '' %>/> Show location</label></div>
+      <div class="field"><label class="check"><input type="checkbox" data-key="showHours" <%= v(topbar,'showHours',true) !== false ? 'checked' : '' %>/> Show working hours</label></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== HERO -->
+<div class="card-admin" data-section="hero">
+  <header>
+    <h2><i class="fa fa-star"></i> Hero</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field">
+        <label>Badge text</label>
+        <input type="text" data-key="badge" value="<%= v(hero,'badge') %>" maxlength="200"/>
+        <div class="hint">Supports {{city}} — currently: "<%= v(hero,'badge') %>"</div>
+      </div>
+      <div class="field">
+        <label>Badge icon</label>
+        <input type="text" data-key="badgeIcon" value="<%= v(hero,'badgeIcon') %>" maxlength="80"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Heading</label>
+      <div class="grid-3">
+        <input type="text" data-key="heading" value="<%= v(hero,'heading') %>" placeholder="Your Trusted" maxlength="120"/>
+        <input type="text" data-key="highlight1" value="<%= v(hero,'highlight1') %>" placeholder="Repair (orange)" maxlength="120"/>
+        <input type="text" data-key="connector" value="<%= v(hero,'connector') %>" placeholder="&amp;" maxlength="20"/>
+      </div>
+      <div class="grid-2" style="margin-top:8px;">
+        <input type="text" data-key="highlight2" value="<%= v(hero,'highlight2') %>" placeholder="Ac Service (teal)" maxlength="120"/>
+        <input type="text" data-key="headingSuffix" value="<%= v(hero,'headingSuffix') %>" placeholder="Experts" maxlength="120"/>
+      </div>
+      <div class="hint">Renders as: <strong><%= v(hero,'heading') %></strong> <em>highlight 1</em> <%= v(hero,'connector') %> <em>highlight 2</em> <strong><%= v(hero,'headingSuffix') %></strong></div>
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea data-key="description" rows="3" maxlength="1000"><%= v(hero,'description') %></textarea>
+    </div>
+
+    <div class="field">
+      <label>Hero image</label>
+      <div class="image-picker">
+        <div class="preview" data-preview style="<% if (v(hero,'imageUrl')) { %>background-image:url('<%= v(hero,'imageUrl') %>');<% } %>"><%- v(hero,'imageUrl') ? '' : '<i class="fa fa-image"></i>' %></div>
+        <div class="picker-body">
+          <input type="text" data-key="imageUrl" data-image-input value="<%= v(hero,'imageUrl') %>" maxlength="600"/>
+          <div class="btn-row" style="margin-top:7px;">
+            <select data-media-picker style="max-width:230px;">
+              <option value="">Pick from media library…</option>
+              <% media.forEach(function (m) { %><option value="<%= m.url %>"><%= m.filename %></option><% }); %>
+            </select>
+            <a class="btn-a btn-sm-a" href="/admin/media" target="_blank"><i class="fa fa-upload"></i> Upload</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Image alt text</label>
+      <input type="text" data-key="imageAlt" value="<%= v(hero,'imageAlt') %>" maxlength="200"/>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Primary button text</label>
+        <input type="text" data-key="primaryBtnText" value="<%= v(hero,'primaryBtnText') %>" maxlength="60"/>
+      </div>
+      <div class="field">
+        <label>Primary button link</label>
+        <input type="text" data-key="primaryBtnLink" value="<%= v(hero,'primaryBtnLink') %>" maxlength="600"/>
+      </div>
+      <div class="field">
+        <label>Primary button icon</label>
+        <input type="text" data-key="primaryBtnIcon" value="<%= v(hero,'primaryBtnIcon') %>" maxlength="80"/>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <label>Secondary button text</label>
+        <input type="text" data-key="secondaryBtnText" value="<%= v(hero,'secondaryBtnText') %>" maxlength="60"/>
+      </div>
+      <div class="field">
+        <label>Secondary button link</label>
+        <input type="text" data-key="secondaryBtnLink" value="<%= v(hero,'secondaryBtnLink') %>" maxlength="600"/>
+      </div>
+      <div class="field">
+        <label>Secondary button icon</label>
+        <input type="text" data-key="secondaryBtnIcon" value="<%= v(hero,'secondaryBtnIcon') %>" maxlength="80"/>
+      </div>
+    </div>
+
+    <div data-repeat data-repeat-name="stats">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Hero statistics</label>
+      <div data-repeat-list>
+        <% (hero.stats || []).forEach(function (st, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label>Value</label><input type="number" data-key="value" data-number="1" value="<%= st.value %>"/></div>
+            <div class="field"><label>Label</label><input type="text" data-key="label" value="<%= st.label %>" maxlength="60"/></div>
+            <div class="field"><label>Style</label><label class="check"><input type="checkbox" data-key="accent" <%= st.accent ? 'checked' : '' %>/> Teal accent</label></div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label>Value</label><input type="number" data-key="value" data-number="1" value="0"/></div>
+            <div class="field"><label>Label</label><input type="text" data-key="label" value="" maxlength="60"/></div>
+            <div class="field"><label>Style</label><label class="check"><input type="checkbox" data-key="accent"/> Teal accent</label></div>
+          </div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add statistic</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ TICKER -->
+<div class="card-admin" data-section="ticker">
+  <header>
+    <h2><i class="fa fa-arrows-left-right"></i> Scrolling Ticker</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+  </header>
+  <div class="card-body">
+    <div data-repeat data-repeat-name="items">
+      <div data-repeat-list>
+        <% (ticker.items || []).forEach(function (it, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="<%= it.icon %>" maxlength="80"/></div>
+            <div class="field"><label>Text</label><input type="text" data-key="text" value="<%= it.text %>" maxlength="120"/></div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="fa fa-check-circle" maxlength="80"/></div>
+            <div class="field"><label>Text</label><input type="text" data-key="text" value="" maxlength="120"/></div>
+          </div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add ticker item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= WELCOME / ABOUT -->
+<div class="card-admin" data-section="about">
+  <header>
+    <h2><i class="fa fa-address-card"></i> Welcome / About</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(about,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(about,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="field">
+      <label>Heading</label>
+      <div class="grid-3">
+        <input type="text" data-key="heading" value="<%= v(about,'heading') %>" placeholder="Welcome to" maxlength="120"/>
+        <input type="text" data-key="highlight" value="<%= v(about,'highlight') %>" placeholder="Highlighted (orange)" maxlength="120"/>
+        <input type="text" data-key="headingSuffix" value="<%= v(about,'headingSuffix') %>" placeholder="Service" maxlength="120"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea data-key="description" rows="5" maxlength="3000"><%= v(about,'description') %></textarea>
+    </div>
+
+    <div data-repeat data-repeat-name="images">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Image grid</label>
+      <div data-repeat-list>
+        <% (about.images || []).forEach(function (img, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="image-picker">
+            <div class="preview" data-preview style="background-image:url('<%= img.url %>');"></div>
+            <div class="picker-body">
+              <div class="field"><label>Image URL</label><input type="text" data-key="url" data-image-input value="<%= img.url %>" maxlength="600"/></div>
+              <div class="field"><label>Alt text</label><input type="text" data-key="alt" value="<%= img.alt || '' %>" maxlength="200"/></div>
+              <select data-media-picker style="max-width:230px;">
+                <option value="">Pick from media library…</option>
+                <% media.forEach(function (m) { %><option value="<%= m.url %>"><%= m.filename %></option><% }); %>
+              </select>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="image-picker">
+            <div class="preview" data-preview><i class="fa fa-image"></i></div>
+            <div class="picker-body">
+              <div class="field"><label>Image URL</label><input type="text" data-key="url" data-image-input value="" maxlength="600"/></div>
+              <div class="field"><label>Alt text</label><input type="text" data-key="alt" value="" maxlength="200"/></div>
+              <select data-media-picker style="max-width:230px;">
+                <option value="">Pick from media library…</option>
+                <% media.forEach(function (m) { %><option value="<%= m.url %>"><%= m.filename %></option><% }); %>
+              </select>
+            </div>
+          </div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add image</button>
+    </div>
+
+    <div data-repeat data-repeat-name="features" style="margin-top:18px;">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Feature items</label>
+      <div data-repeat-list>
+        <% (about.features || []).forEach(function (f, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="<%= f.icon %>" maxlength="80"/></div>
+            <div class="field"><label>Icon colour</label>
+              <select data-key="style">
+                <option value="icon-orange" <%= f.style === 'icon-orange' ? 'selected' : '' %>>Orange</option>
+                <option value="icon-teal" <%= f.style === 'icon-teal' ? 'selected' : '' %>>Teal</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="<%= f.title %>" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"><%= f.description %></textarea></div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="fa fa-check" maxlength="80"/></div>
+            <div class="field"><label>Icon colour</label>
+              <select data-key="style"><option value="icon-orange">Orange</option><option value="icon-teal">Teal</option></select>
+            </div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"></textarea></div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add feature</button>
+    </div>
+
+    <div data-repeat data-repeat-name="stats" style="margin-top:18px;">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Statistics</label>
+      <div data-repeat-list>
+        <% (about.stats || []).forEach(function (st, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Value</label><input type="number" data-key="value" data-number="1" value="<%= st.value %>"/></div>
+            <div class="field"><label>Label</label><input type="text" data-key="label" value="<%= st.label %>" maxlength="60"/></div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Value</label><input type="number" data-key="value" data-number="1" value="0"/></div>
+            <div class="field"><label>Label</label><input type="text" data-key="label" value="" maxlength="60"/></div>
+          </div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add statistic</button>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px;">
+      <div class="field"><label>Button text <span class="hint">(blank = hidden)</span></label><input type="text" data-key="buttonText" value="<%= v(about,'buttonText') %>" maxlength="60"/></div>
+      <div class="field"><label>Button link</label><input type="text" data-key="buttonLink" value="<%= v(about,'buttonLink') %>" maxlength="600"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================== SERVICES HEADING -->
+<div class="card-admin" data-section="services_header">
+  <header>
+    <h2><i class="fa fa-heading"></i> Services — heading</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>The service cards themselves are managed in <a href="/admin/services">Services</a>.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(svcHead,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(svcHead,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Heading</label><input type="text" data-key="heading" value="<%= v(svcHead,'heading') %>" maxlength="160"/><div class="hint">Supports {{city}} — e.g. "AC Repair Services in {{city}}"</div></div>
+      <div class="field"><label>Highlighted word</label><input type="text" data-key="highlight" value="<%= v(svcHead,'highlight') %>" maxlength="120"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================== WHY CHOOSE US -->
+<div class="card-admin" data-section="why">
+  <header>
+    <h2><i class="fa fa-trophy"></i> Why Choose Us</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(why,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(why,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="field">
+      <label>Heading</label>
+      <div class="grid-3">
+        <input type="text" data-key="heading" value="<%= v(why,'heading') %>" placeholder="Why Choose" maxlength="120"/>
+        <input type="text" data-key="highlight" value="<%= v(why,'highlight') %>" placeholder="GOA" maxlength="120"/>
+        <input type="text" data-key="headingSuffix" value="<%= v(why,'headingSuffix') %>" placeholder="Service ?" maxlength="120"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea data-key="description" rows="3" maxlength="1500"><%= v(why,'description') %></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Rating</label><input type="text" data-key="rating" value="<%= v(why,'rating') %>" maxlength="10"/></div>
+      <div class="field"><label>Rating label</label><input type="text" data-key="ratingLabel" value="<%= v(why,'ratingLabel') %>" maxlength="120"/></div>
+    </div>
+
+    <div data-repeat data-repeat-name="cards">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Feature cards</label>
+      <div data-repeat-list>
+        <% (why.cards || []).forEach(function (card, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="<%= card.icon %>" maxlength="80"/></div>
+            <div class="field"><label>Accent</label>
+              <select data-key="accent">
+                <option value="orange" <%= card.accent === 'orange' ? 'selected' : '' %>>Orange</option>
+                <option value="teal" <%= card.accent === 'teal' ? 'selected' : '' %>>Teal</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="<%= card.title %>" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"><%= card.description %></textarea></div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="fa fa-check" maxlength="80"/></div>
+            <div class="field"><label>Accent</label>
+              <select data-key="accent"><option value="orange">Orange</option><option value="teal">Teal</option></select>
+            </div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"></textarea></div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add card</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================== PROCESS -->
+<div class="card-admin" data-section="process">
+  <header>
+    <h2><i class="fa fa-list-ol"></i> How It Works (Steps)</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(proc,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(proc,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="field">
+      <label>Heading</label>
+      <div class="grid-3">
+        <input type="text" data-key="heading" value="<%= v(proc,'heading') %>" placeholder="4 Simple" maxlength="120"/>
+        <input type="text" data-key="highlight" value="<%= v(proc,'highlight') %>" placeholder="Steps" maxlength="120"/>
+        <input type="text" data-key="headingSuffix" value="<%= v(proc,'headingSuffix') %>" placeholder="to Fix" maxlength="120"/>
+      </div>
+    </div>
+
+    <div data-repeat data-repeat-name="steps">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Steps</label>
+      <div data-repeat-list>
+        <% (proc.steps || []).forEach(function (st, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Step number</label><input type="text" data-key="number" value="<%= st.number %>" maxlength="8"/></div>
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="<%= st.icon || '' %>" maxlength="80"/></div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="<%= st.title %>" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"><%= st.description %></textarea></div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Step number</label><input type="text" data-key="number" value="" maxlength="8"/></div>
+            <div class="field"><label>Icon</label><input type="text" data-key="icon" value="fa fa-check" maxlength="80"/></div>
+          </div>
+          <div class="field"><label>Title</label><input type="text" data-key="title" value="" maxlength="160"/></div>
+          <div class="field"><label>Description</label><textarea data-key="description" rows="2" maxlength="600"></textarea></div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add step</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================== TESTIMONIALS HEADING -->
+<div class="card-admin" data-section="testimonials_header">
+  <header>
+    <h2><i class="fa fa-heading"></i> Testimonials — heading</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>Reviews are managed in <a href="/admin/testimonials">Testimonials</a>.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(testiHead,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(testiHead,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Heading</label><input type="text" data-key="heading" value="<%= v(testiHead,'heading') %>" maxlength="120"/></div>
+      <div class="field"><label>Highlighted</label><input type="text" data-key="highlight" value="<%= v(testiHead,'highlight') %>" maxlength="120"/></div>
+      <div class="field"><label>Suffix</label><input type="text" data-key="headingSuffix" value="<%= v(testiHead,'headingSuffix') %>" maxlength="120"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== FAQ HEADING -->
+<div class="card-admin" data-section="faq_header">
+  <header>
+    <h2><i class="fa fa-circle-question"></i> FAQ — heading &amp; sidebar</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>Questions are managed in <a href="/admin/faqs">FAQs</a>.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(faqHead,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(faqHead,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Heading</label><input type="text" data-key="heading" value="<%= v(faqHead,'heading') %>" maxlength="120"/></div>
+      <div class="field"><label>Highlighted</label><input type="text" data-key="highlight" value="<%= v(faqHead,'highlight') %>" maxlength="120"/></div>
+    </div>
+    <div class="field"><label>Description</label><textarea data-key="description" rows="3" maxlength="1000"><%= v(faqHead,'description') %></textarea></div>
+    <div class="grid-3">
+      <div class="field"><label>Button text</label><input type="text" data-key="buttonText" value="<%= v(faqHead,'buttonText') %>" maxlength="60"/></div>
+      <div class="field"><label>Button link</label><input type="text" data-key="buttonLink" value="<%= v(faqHead,'buttonLink') %>" maxlength="600"/></div>
+      <div class="field"><label>Button icon</label><input type="text" data-key="buttonIcon" value="<%= v(faqHead,'buttonIcon') %>" maxlength="80"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================== CONTACT -->
+<div class="card-admin" data-section="contact">
+  <header>
+    <h2><i class="fa fa-envelope"></i> Contact section</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>Phone, WhatsApp, email, address, hours and the Maps link are in <a href="/admin/settings">Settings → Contact</a>.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>Badge</label><input type="text" data-key="badge" value="<%= v(contact,'badge') %>" maxlength="120"/></div>
+      <div class="field"><label>Badge icon</label><input type="text" data-key="badgeIcon" value="<%= v(contact,'badgeIcon') %>" maxlength="80"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Heading</label><input type="text" data-key="heading" value="<%= v(contact,'heading') %>" maxlength="120"/></div>
+      <div class="field"><label>Highlighted</label><input type="text" data-key="highlight" value="<%= v(contact,'highlight') %>" maxlength="120"/></div>
+      <div class="field"><label>Suffix</label><input type="text" data-key="headingSuffix" value="<%= v(contact,'headingSuffix') %>" maxlength="120"/></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Card heading</label><input type="text" data-key="cardHeading" value="<%= v(contact,'cardHeading') %>" maxlength="120"/></div>
+      <div class="field"><label>Card highlighted word</label><input type="text" data-key="cardHighlight" value="<%= v(contact,'cardHighlight') %>" maxlength="120"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Form button text</label><input type="text" data-key="formButtonText" value="<%= v(contact,'formButtonText') %>" maxlength="60"/></div>
+      <div class="field"><label>Form button icon</label><input type="text" data-key="formButtonIcon" value="<%= v(contact,'formButtonIcon') %>" maxlength="80"/></div>
+      <div class="field"><label>WhatsApp link text</label><input type="text" data-key="whatsappButtonText" value="<%= v(contact,'whatsappButtonText') %>" maxlength="60"/></div>
+    </div>
+    <div class="field">
+      <label>Success message</label>
+      <textarea data-key="successMessage" rows="2" maxlength="500"><%= v(contact,'successMessage') %></textarea>
+      <div class="hint">Shown to the visitor after their enquiry is saved.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ FOOTER -->
+<div class="card-admin" data-section="footer">
+  <header>
+    <h2><i class="fa fa-shoe-prints"></i> Footer</h2>
+    <div class="spacer"></div>
+    <button class="btn-a btn-sm-a btn-primary-a" data-save-section><i class="fa fa-floppy-disk"></i> Save</button>
+    <p>Social links and contact details come from <a href="/admin/settings">Settings</a>. The services column mirrors your live services automatically.</p>
+  </header>
+  <div class="card-body">
+    <div class="grid-2">
+      <div class="field"><label>About column title</label><input type="text" data-key="aboutTitle" value="<%= v(footer,'aboutTitle') %>" maxlength="80"/></div>
+      <div class="field"><label>Copyright text</label><input type="text" data-key="copyright" value="<%= v(footer,'copyright') %>" maxlength="300"/></div>
+    </div>
+    <div class="field"><label>About text</label><textarea data-key="about" rows="3" maxlength="1500"><%= v(footer,'about') %></textarea></div>
+    <div class="grid-3">
+      <div class="field"><label>Company column title</label><input type="text" data-key="companyLinksTitle" value="<%= v(footer,'companyLinksTitle') %>" maxlength="80"/></div>
+      <div class="field"><label>Services column title</label><input type="text" data-key="servicesLinksTitle" value="<%= v(footer,'servicesLinksTitle') %>" maxlength="80"/></div>
+      <div class="field"><label>Contact column title</label><input type="text" data-key="contactTitle" value="<%= v(footer,'contactTitle') %>" maxlength="80"/></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Working hours box title</label><input type="text" data-key="hoursTitle" value="<%= v(footer,'hoursTitle') %>" maxlength="80"/></div>
+      <div class="field"><label>Working hours text</label><textarea data-key="hoursText" rows="2" maxlength="300"><%= v(footer,'hoursText') %></textarea></div>
+    </div>
+
+    <div data-repeat data-repeat-name="companyLinks">
+      <label style="display:block;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:7px;">Company links</label>
+      <div data-repeat-list>
+        <% (footer.companyLinks || []).forEach(function (l, i) { %>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#<%= i + 1 %></strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Text</label><input type="text" data-key="text" value="<%= l.text %>" maxlength="80"/></div>
+            <div class="field"><label>URL</label><input type="text" data-key="url" value="<%= l.url %>" maxlength="600"/></div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <template data-repeat-template>
+        <div class="repeat-item">
+          <div class="repeat-head">
+            <strong data-repeat-index>#</strong>
+            <div class="spacer"></div>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-up><i class="fa fa-arrow-up"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon" data-repeat-down><i class="fa fa-arrow-down"></i></button>
+            <button type="button" class="btn-a btn-sm-a btn-icon btn-danger-a" data-repeat-remove><i class="fa fa-trash"></i></button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Text</label><input type="text" data-key="text" value="" maxlength="80"/></div>
+            <div class="field"><label>URL</label><input type="text" data-key="url" value="#" maxlength="600"/></div>
+          </div>
+        </div>
+      </template>
+      <button type="button" class="btn-a btn-sm-a" data-repeat-add><i class="fa fa-plus"></i> Add link</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin-foot') %>
+
+<script>
+(function () {
+  'use strict';
+  var A = window.Admin;
+
+  // Media pickers inside any image-picker block.
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-media-picker]');
+    if (!sel || !sel.value) return;
+    var picker = sel.closest('.image-picker');
+    if (!picker) return;
+    var input = picker.querySelector('[data-image-input]');
+    var preview = picker.querySelector('[data-preview]');
+    if (input) input.value = sel.value;
+    if (preview) {
+      preview.style.backgroundImage = "url('" + sel.value.replace(/'/g, "\\'") + "')";
+      preview.innerHTML = '';
+    }
+    sel.value = '';
+  });
+
+  // Live preview when an image URL is typed.
+  document.addEventListener('input', function (e) {
+    var input = e.target.closest('[data-image-input]');
+    if (!input) return;
+    var picker = input.closest('.image-picker');
+    var preview = picker && picker.querySelector('[data-preview]');
+    if (!preview) return;
+    preview.style.backgroundImage = input.value ? "url('" + input.value.replace(/'/g, "\\'") + "')" : '';
+    preview.innerHTML = input.value ? '' : '<i class="fa fa-image"></i>';
+  });
+
+  /** Build the section payload: plain fields + every named repeat group. */
+  function buildContent(card) {
+    var content = A.collectFields(card);
+    card.querySelectorAll('[data-repeat]').forEach(function (group) {
+      var name = group.getAttribute('data-repeat-name');
+      if (!name) return;
+      var items = A.collectRepeat(group);
+      // "order" is meaningful for steps; elsewhere array position is enough.
+      if (name !== 'steps') {
+        items = items.map(function (o) { delete o.order; return o; });
+      }
+      content[name] = items;
+    });
+    return content;
+  }
+
+  document.querySelectorAll('[data-save-section]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('[data-section]');
+      var key = card.getAttribute('data-section');
+      var original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> Saving…';
+
+      A.api('PUT', '/api/admin/sections/' + key, { content: buildContent(card) })
+        .then(function () { A.toast('Saved — the website is updated.', 'ok'); })
+        .catch(function (err) { A.toast(err.message, 'err'); })
+        .finally(function () {
+          btn.disabled = false;
+          btn.innerHTML = original;
+        });
+    });
+  });
+})();
+</script>
+<%- include("../partials/admin-end") %>

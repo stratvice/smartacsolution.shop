@@ -1,0 +1,594 @@
+<%
+  // --- locals -------------------------------------------------------------
+  const S   = settings;
+  const sec = sections;
+  const hero = sec.hero || {};
+  const about = sec.about || {};
+  const svcHead = sec.services_header || {};
+  const why = sec.why || {};
+  const process_ = sec.process || {};
+  const testiHead = sec.testimonials_header || {};
+  const faqHead = sec.faq_header || {};
+  const contact = sec.contact || {};
+  const footer = sec.footer || {};
+  const topbar = sec.topbar || {};
+  const ticker = sec.ticker || {};
+
+  const loc = location || {};
+  const defaults = loc.defaults || {};
+  const personalise = (S.location_personalisation !== 'false');
+  const P = (t) => personalise ? fmt.personalise(t, loc, defaults) : fmt.personalise(t, null, defaults);
+
+  const phone     = S.phone || '';
+  const telHref   = fmt.telLink(phone);
+  const waHref    = fmt.waLink(S.whatsapp || phone);
+  const company   = S.company_name || '24x7 Customer Support';
+  const brandMain = company.replace(new RegExp('\\s*' + (S.company_name_accent || '') + '\\s*$'), '');
+  const canonical = S.seo_canonical_url || appUrl;
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= S.seo_title || company %></title>
+  <meta name="description" content="<%= P(S.seo_description || '') %>"/>
+  <% if (S.seo_keywords) { %><meta name="keywords" content="<%= S.seo_keywords %>"/><% } %>
+  <meta name="robots" content="<%= S.seo_robots || 'index, follow' %>"/>
+  <link rel="canonical" href="<%= canonical %>"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="<%= P(S.seo_og_title || S.seo_title || company) %>"/>
+  <meta property="og:description" content="<%= P(S.seo_og_description || S.seo_description || '') %>"/>
+  <% if (S.seo_og_image) { %><meta property="og:image" content="<%= S.seo_og_image %>"/><% } %>
+  <meta property="og:url" content="<%= canonical %>"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <% if (S.favicon_url) { %><link rel="icon" href="<%= S.favicon_url %>"/><% } %>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Owl Carousel -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <!-- AOS Animation -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"/>
+
+  <link rel="stylesheet" href="/style.css"/>
+  </head>
+
+
+<body>
+<!-- Scroll Progress -->
+<div id="scrollProgress"></div>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="container d-flex justify-content-between align-items-center flex-wrap gap-1">
+    <div>
+      <% if (topbar.showPhone !== false && phone) { %>
+      <i class="fa fa-phone-alt me-1 teal-dot"></i>
+      <a href="<%= telHref %>"><%= phone %></a>
+      <% } %>
+      <% if (topbar.showEmail !== false && S.email) { %>
+      <span class="mx-2">|</span>
+      <i class="fa fa-envelope me-1 teal-dot"></i>
+      <a href="mailto:<%= S.email %>"><%= S.email %></a>
+      <% } %>
+    </div>
+    <div>
+      <% if (topbar.showLocation !== false) { %>
+      <%# display:inline defeats the stylesheet's `.topbar span{display:none}`
+          rule below 575px, which exists to hide the "|" separators. Without it
+          this wrapper would hide the location text the original page showed. %>
+      <i class="fa fa-map-marker-alt me-1"></i> <span data-loc-short style="display:inline"><%= S.short_location || company %></span>
+      <% } %>
+      <% if (topbar.showHours !== false && S.working_hours) { %>
+      <span class="mx-2">|</span>
+      <i class="fa fa-clock me-1"></i> <%= S.working_hours %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+       <% if (S.logo_url) { %><img src="<%= S.logo_url %>" alt="<%= company %> Logo" onerror="this.style.display='none'"/><% } %>
+      <span><%= brandMain %> <em><%= S.company_name_accent || '' %></em> </span>
+
+
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        <li class="nav-item ms-2"><a class="nav-link nav-cta" href="<%= S.nav_cta_link || telHref %>"><i class="fa fa-phone me-1"></i> <%= S.nav_cta_text || 'Call Now' %></a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="container position-relative" style="z-index:2">
+    <div class="row align-items-center">
+      <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+        <% if (hero.badge) { %><div class="hero-badge" data-loc-text="<%= hero.badge %>"><i class="<%= hero.badgeIcon || 'fa fa-star' %> me-1"></i> <%= P(hero.badge) %></div><% } %>
+        <h1 class="hero-title"><%= hero.heading || '' %> <span><%= hero.highlight1 || '' %></span> <%- hero.connector === '&' ? '&amp;' : (hero.connector || '') %> <span class="teal"><%= hero.highlight2 || '' %></span> <%= hero.headingSuffix || '' %></h1>
+        <p class="hero-sub"><%= P(hero.description || '') %></p>
+        <div class="hero-btns d-flex flex-wrap gap-3 mb-4">
+          <% if (hero.primaryBtnText) { %><a href="<%= hero.primaryBtnLink || telHref %>" class="btn btn-orange"><i class="<%= hero.primaryBtnIcon || 'fa fa-phone' %> me-2"></i><%= hero.primaryBtnText %></a><% } %>
+          <% if (hero.secondaryBtnText) { %><a href="<%= hero.secondaryBtnLink || '#services' %>" class="btn btn-outline-teal"><i class="<%= hero.secondaryBtnIcon || 'fa fa-tools' %> me-2"></i><%= hero.secondaryBtnText %></a><% } %>
+        </div>
+        <div class="row g-2 mt-2">
+          <% (hero.stats || []).forEach(function (st) { %>
+          <div class="col-4">
+            <div class="hero-stat-box">
+              <div class="num<%= st.accent ? ' teal' : '' %>" data-count="<%= st.value %>">0</div>
+              <p><%= st.label %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center" data-aos="fade-left" data-aos-duration="1000">
+        <div class="hero-img-wrap">
+          <div class="hero-glow"></div>
+          <% if (hero.imageUrl) { %><img src="<%= hero.imageUrl %>" alt="<%= hero.imageAlt || company %>" /><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-diagonal"></div>
+</section>
+
+
+<!-- MARQUEE TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <% (ticker.items || []).forEach(function (it) { %><span><i class="<%= it.icon %>"></i><%= it.text %></span>
+    <% }); %>
+  </div>
+</div>
+
+
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5" data-aos="fade-right">
+        <div class="about-img-grid">
+          <% (about.images || []).forEach(function (img) { %><img src="<%= img.url %>" alt="<%= img.alt || '' %>"/>
+          <% }); %>
+        </div>
+      </div>
+      <div class="col-lg-7" data-aos="fade-left">
+        <p class="sec-label"><i class="<%= about.badgeIcon || 'fa fa-tools' %> me-1"></i> <%= about.badge || '' %></p>
+        <h2 class="sec-title"><%= about.heading || '' %> <span><%= about.highlight || '' %></span> <%= about.headingSuffix || '' %> </h2>
+        <div class="sec-divider mb-4"></div>
+        <p style="color:var(--gray); font-size:0.95rem; line-height:1.8; margin-bottom:24px;">
+          <%= P(about.description || '') %>
+        </p>
+        <% (about.features || []).forEach(function (f) { %>
+        <div class="about-feature">
+          <div class="about-feature-icon <%= f.style || 'icon-orange' %>"><i class="<%= f.icon %>"></i></div>
+          <div>
+            <h6><%= f.title %></h6>
+            <p><%= f.description %></p>
+          </div>
+        </div>
+        <% }); %>
+        <div class="counter-row row g-3">
+          <% (about.stats || []).forEach(function (st) { %><div class="col-4 counter-item"><div class="cnt" data-count="<%= st.value %>">0</div><p><%= st.label %></p></div>
+          <% }); %>
+        </div>
+        <% if (about.buttonText) { %>
+        <a href="<%= about.buttonLink || '#contact' %>" class="btn-teal d-inline-block mt-4"><%= about.buttonText %></a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SERVICES -->
+<section class="services-section" id="services">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="sec-label"><i class="<%= svcHead.badgeIcon || 'fa fa-cogs' %> me-1"></i> <%= svcHead.badge || '' %></p>
+      <h2 class="sec-title" data-loc-text="<%= svcHead.heading || '' %> {{highlight}}"><%= P(svcHead.heading || '') %> <span><%= svcHead.highlight || '' %></span></h2>
+      <div class="sec-divider mx-auto"></div>
+    </div>
+    <div class="row g-4">
+      <% services.forEach(function (s, i) { %>
+      <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<%= i * 100 %>">
+        <div class="service-card">
+          <% if (s.badge) { %><span class="badge-tag"><%= s.badge %></span><% } %>
+          <% if (s.imageUrl) { %><img src="<%= s.imageUrl %>" class="service-card-img" alt="<%= s.imageAlt || s.title %>"/><% } %>
+          <div class="service-card-body">
+            <div class="service-card-icon"<%= s.iconStyle ? '' : '' %><% if (s.iconStyle) { %> style="<%= s.iconStyle %>"<% } %>><i class="<%= s.icon %>"></i></div>
+            <h5><%= s.title %></h5>
+            <p><%= s.description %></p>
+            <a href="<%= s.buttonLink %>" class="btn-teal"><i class="<%= s.buttonIcon %> me-1"></i> <%= s.buttonText %></a>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- WHY CHOOSE US -->
+<section class="why-section" id="why">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-4" data-aos="fade-right">
+        <p class="sec-label"><i class="<%= why.badgeIcon || 'fa fa-trophy' %> me-1"></i> <%= why.badge || '' %></p>
+        <h2 class="sec-title" style="color:#fff;"><%= why.heading || '' %> <span><%= P(why.highlight || '') %></span> <%= why.headingSuffix || '' %></h2>
+        <div class="sec-divider mb-4"></div>
+        <p style="color:rgba(255,255,255,0.65); font-size:0.95rem; line-height:1.8;"><%= P(why.description || '') %></p>
+        <div class="why-big-stat mt-4">
+          <div class="big-num"><%= why.rating || '' %><span style="font-size:2.5rem;">★</span></div>
+          <p><%= why.ratingLabel || '' %></p>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="row g-3">
+          <% (why.cards || []).forEach(function (c, i) { %>
+          <div class="col-sm-6" data-aos="fade-up" data-aos-delay="<%= (i % 4) * 80 %>">
+            <div class="why-card">
+              <div class="icon-wrap"<% if (c.accent === 'teal') { %> style="background: linear-gradient(135deg, var(--teal), var(--teal-dark))"<% } %>><i class="<%= c.icon %>"></i></div>
+              <h5><%= c.title %></h5>
+              <p><%= c.description %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- PROCESS -->
+<section class="process-section">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="sec-label"><i class="<%= process_.badgeIcon || 'fa fa-list-ol' %> me-1"></i> <%= process_.badge || '' %></p>
+      <h2 class="sec-title"><%= process_.heading || '' %> <span><%= process_.highlight || '' %></span> <%= process_.headingSuffix || '' %></h2>
+      <div class="sec-divider mx-auto"></div>
+    </div>
+    <div class="row g-4 text-center justify-content-center">
+      <% (process_.steps || []).slice().sort((a,b) => (a.order||0) - (b.order||0)).forEach(function (st, i) { %>
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="<%= i * 100 %>">
+        <div class="process-step">
+          <div class="step-num"><%= st.number %></div>
+          <h6><%= st.title %></h6>
+          <p><%= st.description %></p>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="sec-label" style="color:var(--teal)"><i class="<%= testiHead.badgeIcon || 'fa fa-star' %> me-1"></i> <%= testiHead.badge || '' %></p>
+      <h2 class="sec-title"><%= testiHead.heading || '' %> <span><%= testiHead.highlight || '' %></span> <%= testiHead.headingSuffix || '' %></h2>
+      <div class="sec-divider mx-auto"></div>
+    </div>
+    <div class="owl-carousel testi-carousel" data-aos="fade-up">
+      <% testimonials.forEach(function (t) { %>
+      <div class="testi-card">
+        <div class="testi-stars"><%- fmt.starIcons(t.rating) %></div>
+        <p class="testi-text"><%= t.review %></p>
+        <div class="testi-author"><div class="testi-avatar"<% if (t.imageUrl) { %> style="background-image:url('<%= t.imageUrl %>'); background-size:cover; background-position:center; color:transparent;"<% } %>><%= fmt.initial(t.name) %></div><div><h6><%= t.name %></h6><span><%= t.location || '' %></span></div></div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="row g-5 align-items-start">
+      <div class="col-lg-4" data-aos="fade-right">
+        <p class="sec-label"><i class="<%= faqHead.badgeIcon || 'fa fa-question-circle' %> me-1"></i> <%= faqHead.badge || '' %></p>
+        <h2 class="sec-title"><%= faqHead.heading || '' %> <span><%= faqHead.highlight || '' %></span></h2>
+        <div class="sec-divider mb-4"></div>
+        <p style="color:var(--gray); font-size:0.92rem; line-height:1.7;"><%= faqHead.description || '' %></p>
+        <% if (faqHead.buttonText) { %><a href="<%= faqHead.buttonLink || waHref %>" class="btn-teal d-inline-block mt-3"><i class="<%= faqHead.buttonIcon || 'fab fa-whatsapp' %> me-2"></i><%= faqHead.buttonText %></a><% } %>
+      </div>
+      <div class="col-lg-8" data-aos="fade-left">
+        <div class="accordion" id="faqAccordion">
+          <% faqs.forEach(function (f, i) { %>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button<%= i === 0 ? '' : ' collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#faq<%= f.id %>"><%= f.question %></button>
+            </h2>
+            <div id="faq<%= f.id %>" class="accordion-collapse collapse<%= i === 0 ? ' show' : '' %>" data-bs-parent="#faqAccordion">
+              <div class="accordion-body"><%= f.answer %></div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="sec-label"><i class="<%= contact.badgeIcon || 'fa fa-envelope' %> me-1"></i> <%= contact.badge || '' %></p>
+      <h2 class="sec-title"><%= contact.heading || '' %> <span><%= contact.highlight || '' %></span> <%= contact.headingSuffix || '' %></h2>
+      <div class="sec-divider mx-auto"></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-4" data-aos="fade-right">
+        <div class="contact-card h-100">
+          <h4 style="font-family:'Barlow Condensed',sans-serif; font-size:1.6rem; margin-bottom:28px;"><%= contact.cardHeading || '' %> <span style="color:var(--orange)"><%= contact.cardHighlight || '' %></span></h4>
+          <% if (S.address) { %>
+          <div class="contact-info-item">
+            <div class="contact-icon"><i class="fa fa-map-marker-alt"></i></div>
+            <div><h6>Address</h6><p><% if (S.maps_url) { %><a href="<%= S.maps_url %>" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:none;"><%= S.address %></a><% } else { %><%= S.address %><% } %></p></div>
+          </div>
+          <% } %>
+          <% if (phone) { %>
+          <div class="contact-info-item">
+            <div class="contact-icon"><i class="fa fa-phone-alt"></i></div>
+            <div><h6>Call Us</h6><p><a href="<%= telHref %>" style="color:#fff; text-decoration:none;"><%= phone %></a></p></div>
+          </div>
+          <% } %>
+          <% if (S.whatsapp) { %>
+          <div class="contact-info-item">
+            <div class="contact-icon" style="border-color:#25D366; color:#25D366; background:rgba(37,211,102,0.1);"><i class="fab fa-whatsapp"></i></div>
+            <div><h6>WhatsApp</h6><p><a href="<%= waHref %>" style="color:#25D366; text-decoration:none;"><%= contact.whatsappButtonText || 'Chat with us' %></a></p></div>
+          </div>
+          <% } %>
+          <% if (S.working_hours_full) { %>
+          <div class="contact-info-item">
+            <div class="contact-icon"><i class="fa fa-clock"></i></div>
+            <div><h6>Working Hours</h6><p><%- String(S.working_hours_full).split('\n').map(l => l.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))).join('<br/>') %></p></div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="col-lg-8" data-aos="fade-left">
+        <div class="contact-form bg-white p-4 p-lg-5 rounded-4 shadow-sm">
+          <form id="leadForm" method="post" action="/api/leads" novalidate>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label fw-600" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Full Name</label>
+              <input type="text" name="name" class="form-control" placeholder="Your full name" required minlength="2" maxlength="120"/>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-600" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Phone Number</label>
+              <input type="tel"  name="phone" class="form-control" placeholder="+91 XXXXXXXXXX" required minlength="7" maxlength="25"/>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label"  style="font-size:0.85rem;color:var(--navy);font-weight:600;">Email <span style="font-weight:400;color:var(--gray);">(optional)</span></label>
+              <input type="email" name="email" class="form-control" placeholder="you@example.com" maxlength="160"/>
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label"  style="font-size:0.85rem;color:var(--navy);font-weight:600;">Appliance Type</label>
+              <select class="form-control" name="service">
+                <option value="">Select Appliance</option>
+                <% services.forEach(function (s) { %><option value="<%= s.title %>"><%= s.title %></option><% }); %>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Your Area</label>
+              <input type="text" name="area" class="form-control" placeholder="e.g. Panaji, Mapusa" maxlength="120" data-loc-area/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">City</label>
+              <input type="text" name="city" class="form-control" placeholder="Detecting…" maxlength="120" data-loc-city value="<%= loc.city || '' %>"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Describe the Issue</label>
+              <textarea class="form-control" name="message" rows="4" placeholder="Tell us what's wrong with your appliance..." maxlength="2000"></textarea>
+            </div>
+
+            <!-- anti-spam: hidden from humans, filled only by bots -->
+            <div style="position:absolute;left:-9999px;" aria-hidden="true">
+              <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
+            </div>
+            <input type="hidden" name="state" data-loc-state value="<%= loc.state || '' %>"/>
+            <input type="hidden" name="country" data-loc-country value="<%= loc.country || '' %>"/>
+            <input type="hidden" name="latitude" data-loc-lat value=""/>
+            <input type="hidden" name="longitude" data-loc-lon value=""/>
+            <input type="hidden" name="locationSrc" data-loc-src value="<%= loc.source || '' %>"/>
+            <input type="hidden" name="utmSource" value="<%= utm.source %>"/>
+            <input type="hidden" name="utmMedium" value="<%= utm.medium %>"/>
+            <input type="hidden" name="utmCampaign" value="<%= utm.campaign %>"/>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-submit"><i class="<%= contact.formButtonIcon || 'fa fa-paper-plane' %> me-2"></i><%= contact.formButtonText || 'Send Message' %></button>
+              <div id="leadFormMsg" class="mt-3" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="row g-4">
+   <div class="col-lg-4">
+        <div class="footer-logo mb-3">
+        <h3><%= footer.aboutTitle || 'About Us' %></h3>
+        </div>
+
+    <p> <%= footer.about || '' %></p>
+        <div class="footer-social mt-3">
+          <% if (S.social_facebook) { %><a href="<%= S.social_facebook %>" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a><% } %>
+          <% if (S.social_instagram) { %><a href="<%= S.social_instagram %>" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a><% } %>
+          <% if (S.social_twitter) { %><a href="<%= S.social_twitter %>" target="_blank" rel="noopener noreferrer"><i class="fab fa-x-twitter"></i></a><% } %>
+          <% if (S.social_youtube) { %><a href="<%= S.social_youtube %>" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a><% } %>
+          <% if (S.social_linkedin) { %><a href="<%= S.social_linkedin %>" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a><% } %>
+          <% if (S.whatsapp) { %><a href="<%= waHref %>"><i class="fab fa-whatsapp"></i></a><% } %>
+          <% if (phone) { %><a href="<%= telHref %>"><i class="fa fa-phone"></i></a><% } %>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6><%= footer.companyLinksTitle || 'Company' %></h6>
+        <ul>
+          <% (footer.companyLinks || []).forEach(function (l) { %><li><a href="<%= l.url %>"><%= l.text %></a></li>
+          <% }); %>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-3">
+        <h6><%= footer.servicesLinksTitle || 'Services' %></h6>
+        <ul>
+          <% services.forEach(function (s) { %><li><a href="#services"><%= s.title %></a></li>
+          <% }); %>
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h6><%= footer.contactTitle || 'Contact' %></h6>
+        <ul>
+          <li><a href="<%= S.maps_url || '' %>" target="_blank" rel="noopener noreferrer"><i class="fa fa-map-marker-alt me-2"></i><%= S.short_location || company %></a></li>
+          <% if (phone) { %><li><a href="<%= telHref %>"><i class="fa fa-phone me-2"></i><%= phone %></a></li><% } %>
+          <% if (S.whatsapp) { %><li><a href="<%= waHref %>"><i class="fab fa-whatsapp me-2"></i>WhatsApp Us</a></li><% } %>
+        </ul>
+        <% if (footer.hoursText) { %>
+        <div style="background:rgba(240,106,10,0.1); border: 1px solid var(--orange); border-radius:10px; padding:14px; margin-top:12px;">
+          <p style="color:var(--orange); font-weight:700; font-size:0.82rem; margin:0 0 4px; text-transform:uppercase; letter-spacing:1px;"><%= footer.hoursTitle || 'Working Hours' %></p>
+          <p style="color:rgba(255,255,255,0.7); font-size:0.85rem; margin:0;"><%- String(footer.hoursText).split('\n').map(l => l.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))).join('<br/>') %></p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p><%= footer.copyright || '' %></p>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fa fa-chevron-up"></i>
+</button>
+
+<!-- Sticky CTA -->
+ <div class="footer-oll-now"><div class="col-12 col-md-12 col-lg-12" style="margin-bottom: 0px !important; color: #ffffff;"><a href="<%= S.sticky_cta_link || telHref %>" class="col-now-footer" style="color: #ffffff;"><span class="icon-phone thm-clr" style="color:#fff;"></span> <%= S.sticky_cta_text || '' %></a></div></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+<script>
+  // AOS Init
+  AOS.init({ once: true, offset: 60 });
+
+  // Scroll Progress
+  window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const bar = document.getElementById('scrollProgress');
+    if (bar) bar.style.width = (scrollTop / docHeight * 100) + '%';
+  });
+
+  // Navbar scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('mainNav');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+    const top = document.getElementById('backTop');
+    if (top) top.style.display = window.scrollY > 400 ? 'flex' : 'none';
+    // Sticky CTA
+    const cta = document.getElementById('stickyCTA');
+    if (cta) cta.classList.toggle('visible', window.scrollY > 600);
+  });
+
+  // Counter Animation
+  function animateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseInt(el.getAttribute('data-count'));
+      let count = 0;
+      const step = Math.ceil(target / 80);
+      const timer = setInterval(() => {
+        count = Math.min(count + step, target);
+        el.textContent = count + (target >= 100 ? '+' : '');
+        if (count >= target) clearInterval(timer);
+      }, 18);
+    });
+  }
+
+  // Intersection Observer for counters
+  const counterSection = document.querySelector('.counter-row');
+  if (counterSection) {
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) { animateCounters(); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(counterSection);
+  }
+
+  // Owl Carousels
+  $(document).ready(function () {
+    $('.gallery-carousel').owlCarousel({
+      loop: true, margin: 16, autoplay: true, autoplayTimeout: 3000,
+      responsive: { 0: { items: 1 }, 576: { items: 2 }, 992: { items: 3 } },
+      nav: true, dots: true
+    });
+    $('.testi-carousel').owlCarousel({
+      loop: true, margin: 16, autoplay: true, autoplayTimeout: 4500,
+      responsive: { 0: { items: 1 }, 768: { items: 2 } },
+      nav: false, dots: true
+    });
+    $('.brands-carousel').owlCarousel({
+      loop: true, margin: 0, autoplay: true, autoplayTimeout: 2000, autoplaySpeed: 800,
+      responsive: { 0: { items: 2 }, 576: { items: 3 }, 992: { items: 5 } },
+      nav: false, dots: false, center: true
+    });
+
+    // Smooth scroll
+    $('a[href^="#"]').on('click', function(e) {
+      const target = $(this.hash);
+      if (target.length) {
+        e.preventDefault();
+        $('html,body').animate({ scrollTop: target.offset().top - 75 }, 600);
+        $('.navbar-collapse').collapse('hide');
+      }
+    });
+  });
+</script>
+<script src="/js/geo.js" defer></script>
+<script src="/js/lead-form.js" defer></script>
+</body>
+</html>

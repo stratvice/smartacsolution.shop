@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Sign in · Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/admin/admin.css"/>
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="mark"><i class="fa fa-screwdriver-wrench"></i></div>
+      <h1>24x7 Customer Support</h1>
+      <p>Sign in to the admin panel</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert-err"><i class="fa fa-triangle-exclamation me-1"></i> <%= error %></div>
+    <% } %>
+
+    <form method="post" action="/admin/login" autocomplete="on">
+      <input type="hidden" name="next" value="<%= next || '' %>"/>
+      <div class="field">
+        <label for="identifier">Email or username</label>
+        <input type="text" id="identifier" name="identifier" value="<%= (values && values.identifier) || '' %>"
+               required autofocus autocomplete="username" maxlength="160"/>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" maxlength="200"/>
+      </div>
+      <button type="submit" class="btn-a btn-primary-a">
+        <i class="fa fa-right-to-bracket"></i> Sign in
+      </button>
+    </form>
+
+    <p style="text-align:center;margin:18px 0 0;font-size:.78rem;color:var(--muted);">
+      Protected area · attempts are rate limited
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
+
+<div class="stat-grid">
+  <div class="stat is-total">
+    <div class="label">Total Leads</div>
+    <div class="value"><%= total %></div>
+    <div class="foot">All time</div>
+  </div>
+  <div class="stat is-new">
+    <div class="label">New</div>
+    <div class="value"><%= counts.NEW %></div>
+    <div class="foot"><a href="/admin/leads?status=NEW">Needs first contact</a></div>
+  </div>
+  <div class="stat is-contacted">
+    <div class="label">Contacted</div>
+    <div class="value"><%= counts.CONTACTED %></div>
+    <div class="foot"><a href="/admin/leads?status=CONTACTED">In progress</a></div>
+  </div>
+  <div class="stat is-interested">
+    <div class="label">Interested</div>
+    <div class="value"><%= counts.INTERESTED %></div>
+    <div class="foot"><a href="/admin/leads?status=INTERESTED">Warm</a></div>
+  </div>
+  <div class="stat is-converted">
+    <div class="label">Converted</div>
+    <div class="value"><%= counts.CONVERTED %></div>
+    <div class="foot"><a href="/admin/leads?status=CONVERTED">Won</a></div>
+  </div>
+  <div class="stat is-closed">
+    <div class="label">Closed</div>
+    <div class="value"><%= counts.CLOSED %></div>
+    <div class="foot"><a href="/admin/leads?status=CLOSED">Finished</a></div>
+  </div>
+  <div class="stat is-services">
+    <div class="label">Total Services</div>
+    <div class="value"><%= servicesCount %></div>
+    <div class="foot"><a href="/admin/services">Manage services</a></div>
+  </div>
+</div>
+
+<div class="card-admin">
+  <header>
+    <h2>Recent Leads</h2>
+    <div class="spacer"></div>
+    <a class="btn-a btn-sm-a" href="/admin/leads"><i class="fa fa-list"></i> View all</a>
+  </header>
+
+  <% if (!recent.length) { %>
+    <div class="empty-state">
+      <i class="fa fa-inbox"></i>
+      No leads yet. They appear here the moment someone submits the website form.
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Service</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th class="nowrap">Received</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recent.forEach(function (l) { %>
+          <tr>
+            <td><strong><%= l.name %></strong></td>
+            <td class="nowrap"><a href="tel:<%= l.phone.replace(/[^\d+]/g, '') %>"><%= l.phone %></a></td>
+            <td><%= l.service || '—' %></td>
+            <td><%= [l.city, l.state].filter(Boolean).join(', ') || '—' %></td>
+            <td><span class="badge-status badge-<%= l.status %>"><%= l.status %></span></td>
+            <td class="nowrap muted"><%= new Date(l.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></td>
+            <td class="nowrap">
+              <a class="btn-a btn-sm-a" href="/admin/leads?q=<%= encodeURIComponent(l.phone) %>">Open</a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div class="stat-grid">
+  <div class="stat is-services">
+    <div class="label">Testimonials</div>
+    <div class="value"><%= testimonials %></div>
+    <div class="foot"><a href="/admin/testimonials">Manage</a></div>
+  </div>
+  <div class="stat is-services">
+    <div class="label">FAQs</div>
+    <div class="value"><%= faqs %></div>
+    <div class="foot"><a href="/admin/faqs">Manage</a></div>
+  </div>
+  <div class="stat is-services">
+    <div class="label">Media files</div>
+    <div class="value"><%= media %></div>
+    <div class="foot"><a href="/admin/media">Manage</a></div>
+  </div>
+</div>
+
+<%- include('../partials/admin-foot') %>
+<%- include("../partials/admin-end") %>
