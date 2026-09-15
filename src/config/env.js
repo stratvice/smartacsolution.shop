@@ -98,8 +98,18 @@ if (!env.email.resendApiKey || !env.email.from) {
     '[config] Lead email notifications are inactive — set RESEND_API_KEY and EMAIL_FROM to enable them. Leads are still saved normally.'
   );
 }
+// Local storage is only lossy when the upload directory sits inside the
+// deployed tree, since a release-per-directory host deletes it on each deploy.
+// Pointing UPLOAD_DIR outside that tree makes local storage perfectly safe.
 if (env.isProd && env.storageDriver === 'local') {
-  console.warn('[config] STORAGE_DRIVER=local in production — uploads will not survive a redeploy. Use cloudinary.');
+  const insideAppTree = !path
+    .relative(path.join(__dirname, '..', '..'), env.uploadDir)
+    .startsWith('..');
+  if (insideAppTree) {
+    console.warn(
+      `[config] STORAGE_DRIVER=local with UPLOAD_DIR inside the app (${env.uploadDir}) — uploads are deleted on every deploy. Set UPLOAD_DIR to a path outside the deployed tree, or use cloudinary.`
+    );
+  }
 }
 
 module.exports = env;
