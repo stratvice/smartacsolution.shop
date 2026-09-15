@@ -689,3 +689,87 @@ table.admin-table tbody tr { transition: background 0.12s ease; }
 .badge-select.status-CONVERTED { background-color: #e6f6ee; color: var(--green); border-color: #bbe7d0; }
 .badge-select.status-CLOSED { background-color: #eef1f4; color: #475569; border-color: #d8dfe6; }
 .badge-select:hover { filter: brightness(0.97); }
+
+/* ==========================================================================
+   SETTINGS  —  tab strip and sticky save bar
+   ========================================================================== */
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 5px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.settings-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.83rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.settings-tab i { font-size: 0.85rem; opacity: 0.85; }
+.settings-tab:hover { background: #f1f6fa; color: var(--text); }
+.settings-tab.is-active { background: var(--navy); color: #fff; }
+.settings-tab.is-active i { opacity: 1; }
+
+.settings-tabs ~ form,
+.settings-tabs ~ .card-admin { margin-bottom: 14px; }
+
+.save-bar {
+  position: sticky;
+  bottom: 14px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 -2px 10px rgba(12, 43, 71, 0.06), 0 10px 30px rgba(12, 43, 71, 0.12);
+  transition: border-color 0.2s ease;
+}
+/* Unsaved state is signalled by colour AND by the text beside it, so it does
+   not rely on colour alone. */
+.save-bar.is-dirty { border-color: var(--orange); }
+.save-bar .spacer { flex: 1; }
+.save-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.save-state::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.save-bar.is-dirty .save-state { color: var(--orange-dark); }
+.save-bar.is-dirty .save-state::before { background: var(--orange); }
+
+@media (max-width: 700px) {
+  .settings-tabs { gap: 2px; }
+  .settings-tab { padding: 7px 10px; font-size: 0.78rem; }
+  .settings-tab i { display: none; }
+  .save-bar { flex-wrap: wrap; }
+  .save-state { width: 100%; }
+}

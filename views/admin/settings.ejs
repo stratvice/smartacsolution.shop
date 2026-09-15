@@ -11,9 +11,29 @@
 %>
 <%- include('../partials/admin-head', { title: title, active: active, admin: admin }) %>
 
+<%
+  // Tabs are built from the groups that actually have settings, plus the two
+  // panels that are not setting groups at all.
+  var TABS = ORDER.filter(function (g) { return groups[g]; }).map(function (g) {
+    var m = GROUP_META[g] || { title: g, icon: 'fa fa-gear' };
+    return { key: g, title: m.title, icon: m.icon };
+  });
+  TABS.push({ key: 'notifications', title: 'Notifications', icon: 'fa fa-envelope-circle-check' });
+  TABS.push({ key: 'password', title: 'Password', icon: 'fa fa-key' });
+%>
+
+<nav class="settings-tabs" role="tablist">
+  <% TABS.forEach(function (t, i) { %>
+    <button type="button" class="settings-tab<%= i === 0 ? ' is-active' : '' %>" role="tab"
+            data-tab="<%= t.key %>" aria-selected="<%= i === 0 ? 'true' : 'false' %>">
+      <i class="<%= t.icon %>"></i> <%= t.title %>
+    </button>
+  <% }); %>
+</nav>
+
 <form id="settingsForm">
-<% ORDER.forEach(function (g) { if (!groups[g]) return; var meta = GROUP_META[g] || { title: g, icon: 'fa fa-gear', blurb: '' }; %>
-  <div class="card-admin">
+<% ORDER.forEach(function (g, gi) { if (!groups[g]) return; var meta = GROUP_META[g] || { title: g, icon: 'fa fa-gear', blurb: '' }; %>
+  <div class="card-admin" data-panel="<%= g %>">
     <header>
       <h2><i class="<%= meta.icon %>"></i> <%= meta.title %></h2>
       <p><%= meta.blurb %></p>
@@ -56,7 +76,7 @@
   </div>
 <% }); %>
 
-  <div class="card-admin">
+  <div class="card-admin" data-panel="notifications">
     <header>
       <h2><i class="fa fa-envelope-circle-check"></i> Lead Email Notifications</h2>
       <p>Email every new enquiry to the people below. Changes take effect as soon as you save — no code change or redeploy needed.</p>
@@ -132,17 +152,9 @@
     </div>
   </div>
 
-  <div class="card-admin">
-    <div class="card-body">
-      <div class="btn-row">
-        <button type="submit" class="btn-a btn-primary-a"><i class="fa fa-floppy-disk"></i> Save all settings</button>
-        <a class="btn-a" href="/" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Preview website</a>
-      </div>
-    </div>
-  </div>
 </form>
 
-<div class="card-admin">
+<div class="card-admin" data-panel="password">
   <header>
     <h2><i class="fa fa-key"></i> Change your password</h2>
     <p>Signed in as <strong><%= admin.username %></strong> (<%= admin.email %>).</p>
@@ -165,6 +177,15 @@
     </div>
     <button class="btn-a btn-navy-a" id="pwSave"><i class="fa fa-lock"></i> Update password</button>
   </div>
+</div>
+
+<div class="save-bar" id="saveBar">
+  <span class="save-state" data-save-state>All changes saved</span>
+  <div class="spacer"></div>
+  <a class="btn-a" href="/" target="_blank"><i class="fa fa-arrow-up-right-from-square"></i> Preview website</a>
+  <button type="submit" form="settingsForm" class="btn-a btn-primary-a" data-save-btn>
+    <i class="fa fa-floppy-disk"></i> Save all settings
+  </button>
 </div>
 
 <%- include('../partials/admin-foot') %>
@@ -278,12 +299,68 @@
     document.querySelectorAll('[data-setting]').forEach(function (el) {
       payload[el.getAttribute('data-setting')] = el.value;
     });
-    var btn = e.target.querySelector('button[type="submit"]');
+    // The submit button lives in the sticky bar, outside the form element.
+    var btn = document.querySelector('[data-save-btn]');
     btn.disabled = true;
     A.api('PUT', '/api/admin/settings', { settings: payload })
-      .then(function (r) { A.toast('Saved ' + r.updated + ' settings — the website is updated.', 'ok'); })
+      .then(function (r) {
+        A.toast('Saved ' + r.updated + ' settings — the website is updated.', 'ok');
+        markClean();
+      })
       .catch(function (err) { A.toast(err.message, 'err'); })
       .finally(function () { btn.disabled = false; });
+  });
+
+  // ---------------------------------------------------------------- tabs
+  // Panels are all rendered; JS only controls which one is visible, so with
+  // JS disabled the page degrades to the previous long-scroll form.
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-tab]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+
+  function showTab(key, push) {
+    var match = panels.some(function (p) { return p.getAttribute('data-panel') === key; });
+    if (!match) key = tabs.length ? tabs[0].getAttribute('data-tab') : null;
+    if (!key) return;
+    panels.forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== key; });
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-tab') === key;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (push && window.history.replaceState) window.history.replaceState(null, '', '#' + key);
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { showTab(t.getAttribute('data-tab'), true); });
+  });
+  showTab((window.location.hash || '').replace(/^#/, '') || null, false);
+
+  // ------------------------------------------------- unsaved-change guard
+  var dirty = false;
+  var stateEl = document.querySelector('[data-save-state]');
+  var bar = document.getElementById('saveBar');
+
+  function markDirty() {
+    if (dirty) return;
+    dirty = true;
+    if (bar) bar.classList.add('is-dirty');
+    if (stateEl) stateEl.textContent = 'Unsaved changes';
+  }
+  function markClean() {
+    dirty = false;
+    if (bar) bar.classList.remove('is-dirty');
+    if (stateEl) stateEl.textContent = 'All changes saved';
+  }
+
+  var form = document.getElementById('settingsForm');
+  if (form) {
+    form.addEventListener('input', markDirty);
+    form.addEventListener('change', markDirty);
+  }
+  window.addEventListener('beforeunload', function (e) {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
   });
 
   document.getElementById('pwSave').addEventListener('click', function () {
