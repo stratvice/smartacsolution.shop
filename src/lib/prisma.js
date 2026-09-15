@@ -18,6 +18,10 @@
  * (TINYINT(1)) and JSON columns are converted in both directions without a
  * hand-maintained schema map.
  */
+// Load .env here rather than in each entry point: scripts and the server
+// both reach the database through this module. dotenv never overrides a
+// variable the environment already set, so hPanel SetEnv still wins.
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 
 // ------------------------------------------------------------- connection
