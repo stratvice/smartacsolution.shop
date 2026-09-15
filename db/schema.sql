@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `admins` (
+CREATE TABLE IF NOT EXISTS `admins` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE `admins` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `page_sections` (
+CREATE TABLE IF NOT EXISTS `page_sections` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `key` VARCHAR(191) NOT NULL,
     `label` VARCHAR(191) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE `page_sections` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `services` (
+CREATE TABLE IF NOT EXISTS `services` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
     `slug` VARCHAR(191) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `services` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `testimonials` (
+CREATE TABLE IF NOT EXISTS `testimonials` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `location` VARCHAR(191) NULL,
@@ -74,7 +74,7 @@ CREATE TABLE `testimonials` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `faqs` (
+CREATE TABLE IF NOT EXISTS `faqs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `question` TEXT NOT NULL,
     `answer` TEXT NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE `faqs` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `leads` (
+CREATE TABLE IF NOT EXISTS `leads` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NOT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE `leads` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `lead_notes` (
+CREATE TABLE IF NOT EXISTS `lead_notes` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `leadId` INTEGER NOT NULL,
     `adminId` INTEGER NULL,
@@ -137,7 +137,7 @@ CREATE TABLE `lead_notes` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `media` (
+CREATE TABLE IF NOT EXISTS `media` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(500) NOT NULL,
     `publicId` VARCHAR(191) NULL,
@@ -156,7 +156,7 @@ CREATE TABLE `media` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `site_settings` (
+CREATE TABLE IF NOT EXISTS `site_settings` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `key` VARCHAR(191) NOT NULL,
     `value` VARCHAR(1000) NOT NULL DEFAULT '',

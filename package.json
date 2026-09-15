@@ -8,22 +8,12 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "postinstall": "prisma generate",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio",
-    "db:seed": "node prisma/seed.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed.js",
     "create:admin": "node scripts/create-admin.js",
-    "setup": "prisma migrate deploy && prisma generate && node prisma/seed.js",
-    "db:local": "node scripts/pglite-server.mjs",
-    "dev:restart": "bash scripts/dev-restart.sh"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
+    "setup": "node scripts/init-db.js && node scripts/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.3",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "compression": "^1.7.5",
@@ -36,12 +26,10 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.3.0",
-    "prisma": "^6.19.3",
+    "mysql2": "^3.11.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.8",
-    "@electric-sql/pglite-socket": "^0.2.11",
     "nodemon": "^3.1.9"
   }
 }
