@@ -4,11 +4,15 @@
  * Order of preference:
  *   1. A location already resolved in a previous visit (localStorage).
  *   2. Browser geolocation -> server-side reverse geocode.
- *   3. Server-side IP lookup.
+ *   3. The configured default city.
+ *
+ * IP geolocation is deliberately not in that list. It answers "where is this
+ * visitor?", but the page needs "which area does this business serve?" -- so a
+ * visitor browsing from another state was being shown that state's name on a
+ * Goa site. Only a location the visitor explicitly grants overrides the default.
  *
  * The permission prompt is shown at most once ever: the visitor's answer is
- * remembered in localStorage, so a denial is never re-asked. If everything
- * fails the page simply keeps the server-rendered defaults.
+ * remembered in localStorage, so a denial is never re-asked.
  */
 (function () {
   'use strict';
@@ -114,13 +118,17 @@
       });
   }
 
-  function ipFallback() {
-    return resolveOnServer('').then(function (location) {
-      if (location) {
-        remember(location);
-        apply(location);
-      }
-    });
+  /**
+   * What happens when we do NOT have a granted location.
+   *
+   * Nothing: the server already rendered the configured default city, so
+   * leaving the page alone is the correct result. This used to fall back to an
+   * IP lookup, which guessed the visitor's own city and advertised the wrong
+   * service area (a visitor in Uttar Pradesh saw "Repair in Dadri" on a Goa
+   * site). Only a location the visitor explicitly grants replaces the default.
+   */
+  function useDefaults() {
+    return Promise.resolve();
   }
 
   function start() {
@@ -147,14 +155,14 @@
                 remember(location);
                 apply(location);
               } else {
-                ipFallback();
+                useDefaults();
               }
             }
           );
         },
         function () {
           // Denied, unavailable or timed out — fall back silently.
-          ipFallback();
+          useDefaults();
         },
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 }
       );
@@ -162,7 +170,7 @@
     }
 
     // 3. Permission previously denied, or no geolocation available.
-    ipFallback();
+    useDefaults();
   }
 
   // Mark fields the visitor edits so detection never overwrites their input.

@@ -11,7 +11,9 @@
     "db:init": "node scripts/init-db.js",
     "db:seed": "node scripts/seed.js",
     "create:admin": "node scripts/create-admin.js",
-    "setup": "node scripts/init-db.js && node scripts/seed.js"
+    "setup": "node scripts/init-db.js && node scripts/seed.js",
+    "dev:local": "node scripts/dev-local.js",
+    "images:apply": "node scripts/apply-images.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -31,6 +33,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "mysql-memory-server": "^2.0.0"
   }
 }

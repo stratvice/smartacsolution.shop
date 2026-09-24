@@ -15,3 +15,4 @@ Thumbs.db
 
 # Deploy-persistent env file kept outside the versioned build dir
 .env.shared
+public/images/new/

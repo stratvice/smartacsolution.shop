@@ -430,6 +430,9 @@ img{
     width:100%;
     position:relative;
     z-index:2;
+    /* 20px matches .about-img-grid img and the service/why/process cards, so
+       the hero reads as part of the same set rather than the one square edge. */
+    border-radius:20px;
 }
 
 .hero-glow{

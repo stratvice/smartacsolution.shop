@@ -12,7 +12,9 @@ const PHONE = '+91 93688 13078';
 const PHONE_RAW = '+919368813078';
 const EMAIL = 'smartacsolution.shop@gmail.com';
 const COMPANY = 'Smart ac solution Goa';
-const ADDRESS = 'near sai mandir, sai nagar, Aldona, Mapusa, Goa 403508';
+// Service areas rather than a street address: this is a doorstep service, so
+// what a visitor needs to know is whether their area is covered. One per line.
+const ADDRESS = 'South Goa\nNorth Goa';
 
 // --------------------------------------------------------------- settings
 const SETTINGS = [
@@ -25,12 +27,12 @@ const SETTINGS = [
   ['phone', PHONE, 'contact', 'Phone number', 'tel', 1],
   ['whatsapp', PHONE_RAW, 'contact', 'WhatsApp number', 'tel', 2],
   ['email', EMAIL, 'contact', 'Email address', 'email', 3],
-  ['address', ADDRESS, 'contact', 'Address', 'textarea', 4],
-  ['short_location', 'Smart ac solution Goa', 'contact', 'Short location (top bar)', 'text', 5],
-  ['working_hours', 'Mon–Sat: 8AM – 8PM', 'contact', 'Working hours (short)', 'text', 6],
+  ['address', ADDRESS, 'contact', 'Service areas (one per line)', 'textarea', 4],
+  ['short_location', 'Goa', 'contact', 'Short location (top bar)', 'text', 5],
+  ['working_hours', 'Mon–Sun: 8AM – 8PM', 'contact', 'Working hours (short)', 'text', 6],
   [
     'working_hours_full',
-    'Mon – Sat: 7:00 AM – 11:00 PM\nSunday: 07:00 AM – 11:00 PM',
+    'Mon – Sun: 8:00 AM – 8:00 PM',
     'contact',
     'Working hours (full)',
     'textarea',
@@ -57,7 +59,7 @@ const SETTINGS = [
   ],
 
   ['primary_cta_text', 'Book Now', 'cta', 'Primary CTA text', 'text', 1],
-  ['primary_cta_link', 'tel:' + PHONE_RAW, 'cta', 'Primary CTA link', 'text', 2],
+  ['primary_cta_link', '#contact', 'cta', 'Primary CTA link', 'text', 2],
   ['secondary_cta_text', 'Our Services', 'cta', 'Secondary CTA text', 'text', 3],
   ['secondary_cta_link', '#services', 'cta', 'Secondary CTA link', 'text', 4],
   ['nav_cta_text', 'Call Now', 'cta', 'Navbar CTA text', 'text', 5],
@@ -143,15 +145,15 @@ const SECTIONS = [
       imageUrl: '/images/abt_rep.webp',
       imageAlt: 'Smart ac solution Goa',
       primaryBtnText: 'Book Now',
-      primaryBtnLink: 'tel:' + PHONE_RAW,
-      primaryBtnIcon: 'fa fa-phone',
+      primaryBtnLink: '#contact',
+      primaryBtnIcon: '',
       secondaryBtnText: 'Our Services',
       secondaryBtnLink: '#services',
       secondaryBtnIcon: 'fa fa-tools',
       stats: [
-        { value: 3000, label: 'Jobs Done', accent: false },
-        { value: 2500, label: 'Happy Clients', accent: true },
-        { value: 10, label: 'Expert Staff', accent: false },
+        { value: 9000, label: 'Jobs Done', accent: false },
+        { value: 8500, label: 'Happy Customers', accent: true },
+        { value: 70, label: 'Expert Staff', accent: false },
       ],
     },
   },
@@ -211,9 +213,9 @@ const SECTIONS = [
         },
       ],
       stats: [
-        { value: 3000, label: 'Work Done' },
-        { value: 2500, label: 'Clients' },
-        { value: 10, label: 'Staff' },
+        { value: 9000, label: 'Work Done' },
+        { value: 8500, label: 'Clients' },
+        { value: 70, label: 'Staff' },
       ],
       buttonText: '',
       buttonLink: '',
@@ -395,7 +397,7 @@ const SECTIONS = [
       servicesLinksTitle: 'Services',
       contactTitle: 'Contact',
       hoursTitle: 'Working Hours',
-      hoursText: 'Mon–Sat: 8AM – 8PM\nSun: 10AM – 6PM',
+      hoursText: 'Mon–Sun: 8AM – 8PM',
       copyright: '© ' + new Date().getFullYear() + ' ' + COMPANY + '. All Rights Reserved.',
     },
   },

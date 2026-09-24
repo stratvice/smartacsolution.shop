@@ -51,7 +51,12 @@
     // admin, so it stays correct when those are edited.
     // De-duplicated: city and state are often both "Goa" here, and repeating
     // the same Place twice is noise in the markup.
-    const schemaAreas = [...new Set([S.default_city, S.default_state].filter(Boolean))];
+    // Service areas drive areaServed — the field search engines actually use to
+    // decide which searches this business is relevant to. The address setting
+    // now holds areas ("South Goa", "North Goa") rather than a street address,
+    // so each line becomes a Place alongside the configured city and state.
+    const areaLines = String(S.address || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    const schemaAreas = [...new Set([...areaLines, S.default_city, S.default_state].filter(Boolean))];
     // Schema.org requires absolute URLs for images; a relative path is dropped.
     const abs = (u) => !u ? u : (/^https?:\/\//.test(u) ? u : canonical.replace(/\/$/, "") + (u.startsWith("/") ? u : "/" + u));
     // openingHours has a defined grammar ("Mo-Sa 08:00-20:00"). The admin field
@@ -72,7 +77,10 @@
       ...(S.logo_url ? { logo: abs(S.logo_url), image: abs(S.logo_url) } : (S.seo_og_image ? { image: abs(S.seo_og_image) } : {})),
       ...(phone ? { telephone: phone } : {}),
       ...(S.email ? { email: S.email } : {}),
-      ...(S.address ? { address: { '@type': 'PostalAddress', streetAddress: S.address,
+      // No streetAddress: the setting holds service areas, not a street, and
+      // publishing those as a postal address would be inaccurate structured
+      // data. Locality/region/country still describe where the business is.
+      ...(S.default_city || S.default_state ? { address: { '@type': 'PostalAddress',
             ...(S.default_city ? { addressLocality: S.default_city } : {}),
             ...(S.default_state ? { addressRegion: S.default_state } : {}),
             addressCountry: country } } : {}),
@@ -126,7 +134,7 @@
   <div class="container d-flex justify-content-between align-items-center flex-wrap gap-1">
     <div>
       <% if (topbar.showPhone !== false && phone) { %>
-      <i class="fa fa-phone-alt me-1 teal-dot"></i>
+      <i class="fa fa-phone me-1 teal-dot"></i>
       <a href="<%= telHref %>"><%= phone %></a>
       <% } %>
       <% if (topbar.showEmail !== false && S.email) { %>
@@ -184,8 +192,10 @@
         <h1 class="hero-title"><%= hero.heading || '' %> <span><%= hero.highlight1 || '' %></span> <%- hero.connector === '&' ? '&amp;' : (hero.connector || '') %> <span class="teal"><%= hero.highlight2 || '' %></span> <%= hero.headingSuffix || '' %></h1>
         <p class="hero-sub"><%= P(hero.description || '') %></p>
         <div class="hero-btns d-flex flex-wrap gap-3 mb-4">
-          <% if (hero.primaryBtnText) { %><a href="<%= hero.primaryBtnLink || telHref %>" class="btn btn-orange"><i class="<%= hero.primaryBtnIcon || 'fa fa-phone' %> me-2"></i><%= hero.primaryBtnText %></a><% } %>
-          <% if (hero.secondaryBtnText) { %><a href="<%= hero.secondaryBtnLink || '#services' %>" class="btn btn-outline-teal"><i class="<%= hero.secondaryBtnIcon || 'fa fa-tools' %> me-2"></i><%= hero.secondaryBtnText %></a><% } %>
+          <%# Icons are optional: an empty icon field renders no <i> at all,
+              rather than silently falling back to a default one. %>
+          <% if (hero.primaryBtnText) { %><a href="<%= hero.primaryBtnLink || '#contact' %>" class="btn btn-orange"><% if (hero.primaryBtnIcon) { %><i class="<%= hero.primaryBtnIcon %> me-2"></i><% } %><%= hero.primaryBtnText %></a><% } %>
+          <% if (hero.secondaryBtnText) { %><a href="<%= hero.secondaryBtnLink || '#services' %>" class="btn btn-outline-teal"><% if (hero.secondaryBtnIcon) { %><i class="<%= hero.secondaryBtnIcon %> me-2"></i><% } %><%= hero.secondaryBtnText %></a><% } %>
         </div>
         <div class="row g-2 mt-2">
           <% (hero.stats || []).forEach(function (st) { %>
@@ -212,9 +222,17 @@
 
 <!-- MARQUEE TICKER -->
 <div class="ticker-wrap">
+  <%# The item list is rendered TWICE on purpose. The CSS animation scrolls to
+      translateX(-50%) — exactly one copy's width — so the loop restarts on a
+      visually identical frame and the motion reads as continuous. With a single
+      copy, -50% stops halfway through the list and snaps back, which is the gap
+      this used to show. The second copy is aria-hidden so assistive tech does
+      not announce every item twice. %>
   <div class="ticker-inner">
-    <% (ticker.items || []).forEach(function (it) { %><span><i class="<%= it.icon %>"></i><%= it.text %></span>
-    <% }); %>
+    <% for (var copy = 0; copy < 2; copy++) { %>
+      <% (ticker.items || []).forEach(function (it) { %><span<%- copy ? ' aria-hidden="true"' : '' %>><i class="<%= it.icon %>"></i><%= it.text %></span>
+      <% }); %>
+    <% } %>
   </div>
 </div>
 
@@ -415,12 +433,15 @@
           <% if (S.address) { %>
           <div class="contact-info-item">
             <div class="contact-icon"><i class="fa fa-map-marker-alt"></i></div>
-            <div><h6>Address</h6><p><% if (S.maps_url) { %><a href="<%= S.maps_url %>" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:none;"><%= S.address %></a><% } else { %><%= S.address %><% } %></p></div>
+            <%# Each line of the setting is its own row: newlines collapse to a
+                space in HTML, so "South Goa\nNorth Goa" would otherwise render
+                as one run-on line. %>
+            <div><h6>Service Areas</h6><p><% String(S.address).split('\n').map(function (l) { return l.trim(); }).filter(Boolean).forEach(function (line) { %><span style="display:block;"><% if (S.maps_url) { %><a href="<%= S.maps_url %>" target="_blank" rel="noopener noreferrer" style="color:#fff; text-decoration:none;"><%= line %></a><% } else { %><%= line %><% } %></span><% }); %></p></div>
           </div>
           <% } %>
           <% if (phone) { %>
           <div class="contact-info-item">
-            <div class="contact-icon"><i class="fa fa-phone-alt"></i></div>
+            <div class="contact-icon"><i class="fa fa-phone"></i></div>
             <div><h6>Call Us</h6><p><a href="<%= telHref %>" style="color:#fff; text-decoration:none;"><%= phone %></a></p></div>
           </div>
           <% } %>
@@ -470,7 +491,7 @@
             </div>
             <div class="col-sm-6">
               <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">City</label>
-              <input type="text" name="city" class="form-control" placeholder="Detecting…" maxlength="120" data-loc-city value="<%= loc.city || '' %>"/>
+              <input type="text" name="city" class="form-control" placeholder="Your city" maxlength="120" data-loc-city value="<%= loc.city || defaults.city || '' %>"/>
             </div>
             <div class="col-12">
               <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Describe the Issue</label>
@@ -595,26 +616,56 @@
   });
 
   // Counter Animation
-  function animateCounters() {
-    document.querySelectorAll('[data-count]').forEach(el => {
-      const target = parseInt(el.getAttribute('data-count'));
-      let count = 0;
-      const step = Math.ceil(target / 80);
-      const timer = setInterval(() => {
-        count = Math.min(count + step, target);
-        el.textContent = count + (target >= 100 ? '+' : '');
-        if (count >= target) clearInterval(timer);
-      }, 18);
-    });
+  function animateCounter(el) {
+    if (el.dataset.counted === '1') return; // never restart a finished counter
+    el.dataset.counted = '1';
+    const target = parseInt(el.getAttribute('data-count'), 10) || 0;
+    let count = 0;
+    const step = Math.max(1, Math.ceil(target / 80));
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = count + '+';
+      if (count >= target) clearInterval(timer);
+    }, 18);
   }
 
-  // Intersection Observer for counters
-  const counterSection = document.querySelector('.counter-row');
-  if (counterSection) {
-    const obs = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) { animateCounters(); obs.disconnect(); }
-    }, { threshold: 0.3 });
-    obs.observe(counterSection);
+  // Each counter starts when IT reaches the viewport, so the hero figures run
+  // as soon as the hero is on screen.
+  //
+  // This previously used one observer watching `.counter-row`, which lives in
+  // the About section — but animateCounters() then animated every [data-count]
+  // on the page, hero included. So the hero counters sat at 0 until the visitor
+  // scrolled a full screen down to the About section, and on a short viewport
+  // they could read 0 for as long as the visitor stayed at the top.
+  const counters = document.querySelectorAll('[data-count]');
+  if (counters.length) {
+    const onScreen = (el) => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    };
+
+    // Anything already on screen starts now, by plain geometry. The hero
+    // figures are above the fold, so they must not wait on an observer
+    // callback: IntersectionObserver does not run while a page is unrendered
+    // (background tab, prerender), which would leave them showing 0.
+    const pending = [];
+    counters.forEach((el) => (onScreen(el) ? animateCounter(el) : pending.push(el)));
+
+    // Everything further down waits until it is scrolled to.
+    if (pending.length) {
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            animateCounter(entry.target);
+            obs.unobserve(entry.target);
+          });
+        }, { threshold: 0.2 });
+        pending.forEach((el) => obs.observe(el));
+      } else {
+        pending.forEach(animateCounter); // no observer support: just show them
+      }
+    }
   }
 
   // Owl Carousels

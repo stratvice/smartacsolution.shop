@@ -44,8 +44,18 @@ async function initialLocation(req, settings) {
     }
   }
 
-  const byIp = await geo.lookupByIp(geo.clientIp(req));
-  return { ...(byIp || { city: null, state: null, country: null, source: null }), defaults };
+  // No IP lookup here, deliberately. The displayed location comes only from a
+  // location the visitor explicitly granted (remembered in the cookie above);
+  // otherwise the page shows the configured defaults.
+  //
+  // IP geolocation guesses the visitor's own city, which is the wrong question
+  // for a business that serves one area: a browser in Uttar Pradesh was being
+  // shown "#1 Appliance Repair in Dadri" on a Goa service. Falling back to the
+  // configured city is both accurate and better for conversion.
+  //
+  // IP lookup is still used when a lead is submitted (routes/api.public.js) to
+  // enrich the record, where a best guess beats storing nothing.
+  return { city: null, state: null, country: null, source: null, defaults };
 }
 
 router.get(
