@@ -13,7 +13,8 @@
     "create:admin": "node scripts/create-admin.js",
     "setup": "node scripts/init-db.js && node scripts/seed.js",
     "dev:local": "node scripts/dev-local.js",
-    "images:apply": "node scripts/apply-images.js"
+    "images:apply": "node scripts/apply-images.js",
+    "content:update": "node scripts/apply-content-update.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

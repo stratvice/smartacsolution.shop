@@ -1,0 +1,171 @@
+'use strict';
+/**
+ * Apply the reviewed content changes to a database that already has content.
+ *
+ *   node scripts/apply-content-update.js
+ *
+ * db:seed deliberately never overwrites an existing value — that is correct,
+ * because it must not clobber edits made in the admin. The consequence is that
+ * deploying new seed defaults changes nothing on a live site. This script sets
+ * the specific values that were agreed, and nothing else.
+ *
+ * Idempotent: re-running makes no further changes, and it reports exactly what
+ * it altered so the result can be checked rather than assumed.
+ */
+require('../src/config/load-env');
+const prisma = require('../src/lib/prisma');
+const content = require('../src/services/content');
+
+const PHONE = '+91 93688 13078';
+const PHONE_RAW = '+919368813078';
+const EMAIL = 'smartacsolution.shop@gmail.com';
+const COMPANY = 'Smart ac solution Goa';
+
+// Images already deployed under public/images/ by the same commit.
+const IMG = {
+  hero: '/images/hero-collage-69f02627.jpeg',
+  about: [
+    '/images/about-1-3ad4f7ce.png',
+    '/images/about-2-33f0d76e.png',
+    '/images/about-3-0159e3cf.png',
+  ],
+};
+
+const SETTINGS = {
+  company_name: COMPANY,
+  company_name_accent: 'Goa',
+  phone: PHONE,
+  whatsapp: PHONE_RAW,
+  email: EMAIL,
+  short_location: 'Goa',
+  address: 'South Goa\nNorth Goa',
+  working_hours: 'Mon–Sun: 8AM – 8PM',
+  working_hours_full: 'Mon – Sun: 8:00 AM – 8:00 PM',
+  // Book Now scrolls to the enquiry form; a tel: link does nothing on desktop.
+  primary_cta_link: '#contact',
+  nav_cta_link: 'tel:' + PHONE_RAW,
+  sticky_cta_text: 'Call Now: ' + PHONE,
+  sticky_cta_link: 'tel:' + PHONE_RAW,
+  seo_title: COMPANY + ' | Home Appliance Repair Experts',
+  seo_og_title: COMPANY + ' | Home Appliance Repair Experts',
+  seo_og_image: IMG.hero,
+};
+
+const changes = [];
+const note = (s) => { changes.push(s); };
+
+async function setSetting(key, value) {
+  const row = await prisma.siteSetting.findFirst({ where: { key } });
+  if (!row) { note(`setting ${key}: missing, skipped`); return; }
+  if (row.value === value) return;
+  await prisma.siteSetting.update({ where: { key }, data: { value } });
+  note(`setting ${key}`);
+}
+
+/** Replace old contact details anywhere they appear in free text. */
+function scrub(v) {
+  if (typeof v !== 'string') return v;
+  return v
+    .split('24x7 Customer Support').join(COMPANY)
+    .split('+91 92725 25956').join(PHONE)
+    .split('+919272525956').join(PHONE_RAW)
+    .split('9272525956').join('9368813078')
+    .split('sac794905@gmail.com').join(EMAIL);
+}
+function scrubDeep(v) {
+  if (typeof v === 'string') return scrub(v);
+  if (Array.isArray(v)) return v.map(scrubDeep);
+  if (v && typeof v === 'object') {
+    const o = {};
+    for (const [k, val] of Object.entries(v)) o[k] = scrubDeep(val);
+    return o;
+  }
+  return v;
+}
+
+async function main() {
+  for (const [k, v] of Object.entries(SETTINGS)) await setSetting(k, v);
+
+  // Any remaining stale mentions in other settings (footer text, SEO copy…).
+  for (const row of await prisma.siteSetting.findMany({})) {
+    if (SETTINGS[row.key] !== undefined) continue;
+    const next = scrub(row.value);
+    if (next !== row.value) { await prisma.siteSetting.update({ where: { key: row.key }, data: { value: next } }); note(`setting ${row.key} (scrubbed)`); }
+  }
+
+  // --- hero: imagery, counters, and the Book Now button --------------------
+  const heroRow = await prisma.pageSection.findFirst({ where: { key: 'hero' } });
+  if (heroRow) {
+    const hero = scrubDeep({ ...heroRow.content });
+    hero.imageUrl = IMG.hero;
+    hero.imageAlt = COMPANY;
+    hero.primaryBtnLink = '#contact';
+    hero.primaryBtnIcon = '';
+    hero.stats = [
+      { value: 9000, label: 'Jobs Done', accent: false },
+      { value: 8500, label: 'Happy Customers', accent: true },
+      { value: 70, label: 'Expert Staff', accent: false },
+    ];
+    await prisma.pageSection.update({ where: { key: 'hero' }, data: { content: hero } });
+    note('section hero (images, counters, Book Now)');
+  }
+
+  // --- about: three images, matching counters ------------------------------
+  const aboutRow = await prisma.pageSection.findFirst({ where: { key: 'about' } });
+  if (aboutRow) {
+    const about = scrubDeep({ ...aboutRow.content });
+    about.images = (about.images || []).map((img, i) => ({ ...img, url: IMG.about[i] || img.url }));
+    about.stats = [
+      { value: 9000, label: 'Work Done' },
+      { value: 8500, label: 'Clients' },
+      { value: 70, label: 'Staff' },
+    ];
+    await prisma.pageSection.update({ where: { key: 'about' }, data: { content: about } });
+    note('section about (images, counters)');
+  }
+
+  // --- every other section, plus services/testimonials/faqs ----------------
+  for (const s of await prisma.pageSection.findMany({})) {
+    if (s.key === 'hero' || s.key === 'about') continue;
+    const next = scrubDeep(s.content);
+    if (JSON.stringify(next) !== JSON.stringify(s.content)) {
+      await prisma.pageSection.update({ where: { key: s.key }, data: { content: next } });
+      note(`section ${s.key} (scrubbed)`);
+    }
+  }
+  for (const r of await prisma.service.findMany({})) {
+    const d = {};
+    for (const f of ['title', 'description', 'badge', 'buttonText', 'buttonLink', 'imageAlt']) {
+      const n = scrub(r[f]); if (n !== r[f]) d[f] = n;
+    }
+    if (Object.keys(d).length) { await prisma.service.update({ where: { id: r.id }, data: d }); note(`service #${r.id}`); }
+  }
+  for (const r of await prisma.testimonial.findMany({})) {
+    const d = {};
+    for (const f of ['name', 'location', 'review']) { const n = scrub(r[f]); if (n !== r[f]) d[f] = n; }
+    if (Object.keys(d).length) { await prisma.testimonial.update({ where: { id: r.id }, data: d }); note(`testimonial #${r.id}`); }
+  }
+  for (const r of await prisma.faq.findMany({})) {
+    const d = {};
+    for (const f of ['question', 'answer']) { const n = scrub(r[f]); if (n !== r[f]) d[f] = n; }
+    if (Object.keys(d).length) { await prisma.faq.update({ where: { id: r.id }, data: d }); note(`faq #${r.id}`); }
+  }
+
+  content.invalidate();
+
+  console.log(changes.length ? `\n${changes.length} change(s):` : '\nAlready up to date — nothing changed.');
+  changes.forEach((c) => console.log('  ' + c));
+
+  // Prove no stale contact details survive anywhere.
+  const stale = [];
+  const STALE = /24x7 Customer Support|92725|sac794905/;
+  for (const r of await prisma.siteSetting.findMany({})) if (STALE.test(String(r.value))) stale.push('setting ' + r.key);
+  for (const s of await prisma.pageSection.findMany({})) if (STALE.test(JSON.stringify(s.content))) stale.push('section ' + s.key);
+  for (const r of await prisma.faq.findMany({})) if (STALE.test(r.question + r.answer)) stale.push('faq #' + r.id);
+  for (const r of await prisma.testimonial.findMany({})) if (STALE.test([r.name, r.location, r.review].join(' '))) stale.push('testimonial #' + r.id);
+  console.log(stale.length ? '\nSTILL STALE: ' + stale.join(', ') : '\nNo stale contact details remain.');
+}
+
+main()
+  .catch((e) => { console.error('content update failed:', e.message); process.exitCode = 1; })
+  .finally(() => prisma.$disconnect());
