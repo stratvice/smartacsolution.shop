@@ -63,7 +63,7 @@ function row(label, value, opts = {}) {
  * `opts.companyName` titles the email; `opts.adminUrl` links back to the panel.
  */
 function leadEmail(lead, opts = {}) {
-  const company = opts.companyName || '24x7 Customer Support';
+  const company = opts.companyName || 'Smart ac solution Goa';
   const timeZone = opts.timeZone || 'Asia/Kolkata';
   const created = formatDate(lead.createdAt || new Date(), timeZone);
   const location = locationLine(lead);

@@ -65,7 +65,7 @@
             <input type="<%= s.type === 'tel' ? 'tel' : s.type === 'email' ? 'email' : 'text' %>"
                    id="set-<%= s.key %>" data-setting="<%= s.key %>" value="<%= s.value %>" maxlength="5000"/>
           <% } %>
-          <% if (s.key === 'whatsapp') { %><div class="hint">Digits with country code, e.g. +919272525956 — used to build every wa.me link.</div><% } %>
+          <% if (s.key === 'whatsapp') { %><div class="hint">Digits with country code, e.g. +919368813078 — used to build every wa.me link.</div><% } %>
           <% if (s.key === 'location_personalisation') { %><div class="hint">Set to <code>false</code> to stop swapping <code>{{city}}</code> into headings.</div><% } %>
           <% if (s.key === 'seo_canonical_url') { %><div class="hint">Leave blank to use APP_URL. Also used as the sitemap base.</div><% } %>
           <% if (s.key === 'seo_robots') { %><div class="hint">Use <code>noindex, nofollow</code> to hide the site from search engines (also updates robots.txt).</div><% } %>

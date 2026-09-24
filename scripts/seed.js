@@ -8,16 +8,16 @@
  */
 const prisma = require('../src/lib/prisma');
 
-const PHONE = '+91 92725 25956';
-const PHONE_RAW = '+919272525956';
-const EMAIL = 'sac794905@gmail.com';
-const COMPANY = '24x7 Customer Support';
+const PHONE = '+91 93688 13078';
+const PHONE_RAW = '+919368813078';
+const EMAIL = 'smartacsolution.shop@gmail.com';
+const COMPANY = 'Smart ac solution Goa';
 const ADDRESS = 'near sai mandir, sai nagar, Aldona, Mapusa, Goa 403508';
 
 // --------------------------------------------------------------- settings
 const SETTINGS = [
   ['company_name', COMPANY, 'general', 'Company name', 'text', 1],
-  ['company_name_accent', 'Support', 'general', 'Brand word shown in accent colour', 'text', 2],
+  ['company_name_accent', 'Goa', 'general', 'Brand word shown in accent colour', 'text', 2],
   ['logo_url', '', 'general', 'Logo', 'image', 3],
   ['favicon_url', '', 'general', 'Favicon', 'image', 4],
   ['tagline', 'Your Trusted Repair & Ac Service Experts', 'general', 'Tagline', 'text', 5],
@@ -26,7 +26,7 @@ const SETTINGS = [
   ['whatsapp', PHONE_RAW, 'contact', 'WhatsApp number', 'tel', 2],
   ['email', EMAIL, 'contact', 'Email address', 'email', 3],
   ['address', ADDRESS, 'contact', 'Address', 'textarea', 4],
-  ['short_location', '24x7 Customer Support, Goa', 'contact', 'Short location (top bar)', 'text', 5],
+  ['short_location', 'Smart ac solution Goa', 'contact', 'Short location (top bar)', 'text', 5],
   ['working_hours', 'Mon–Sat: 8AM – 8PM', 'contact', 'Working hours (short)', 'text', 6],
   [
     'working_hours_full',
@@ -68,7 +68,7 @@ const SETTINGS = [
 
   [
     'seo_title',
-    '24x7 Customer Support | Home Appliance Repair Experts',
+    'Smart ac solution Goa | Home Appliance Repair Experts',
     'seo',
     'Page title',
     'text',
@@ -92,7 +92,7 @@ const SETTINGS = [
   ],
   [
     'seo_og_title',
-    '24x7 Customer Support | Home Appliance Repair Experts',
+    'Smart ac solution Goa | Home Appliance Repair Experts',
     'seo',
     'OG title',
     'text',
@@ -141,7 +141,7 @@ const SECTIONS = [
       description:
         'Fast, reliable, and affordable home appliance repair — Air Conditioner. One call, we fix it all.',
       imageUrl: '/images/abt_rep.webp',
-      imageAlt: '24x7 Customer Support',
+      imageAlt: 'Smart ac solution Goa',
       primaryBtnText: 'Book Now',
       primaryBtnLink: 'tel:' + PHONE_RAW,
       primaryBtnIcon: 'fa fa-phone',
@@ -181,7 +181,7 @@ const SECTIONS = [
       highlight: COMPANY,
       headingSuffix: 'Service',
       description:
-        "At 24x7 Customer Support, we understand your home runs on the reliability of your appliances. When a machine breaks down, it's not just a technical glitch — it's a disruption to your daily life. We're dedicated to providing fast, professional, and transparent repair services that get your household back on track.",
+        "At Smart ac solution Goa, we understand your home runs on the reliability of your appliances. When a machine breaks down, it's not just a technical glitch — it's a disruption to your daily life. We're dedicated to providing fast, professional, and transparent repair services that get your household back on track.",
       images: [
         { url: '/images/images.jfif', alt: 'Technician at work' },
         { url: '/images/06b00d1f-11a8-47ac-9a74-12daf4974349_.jpg', alt: 'AC repair' },
@@ -200,7 +200,7 @@ const SECTIONS = [
           style: 'icon-teal',
           title: 'Same-Day Service',
           description:
-            'Quick response times — because "24x7 Customer Support" is not just a name, it\'s our promise.',
+            'Quick response times — round-the-clock availability is a promise, not a slogan.',
         },
         {
           icon: 'fa fa-rupee-sign',
@@ -454,7 +454,7 @@ const SERVICES = [
 const TESTIMONIALS = [
   {
     name: 'Rahul Naik',
-    location: '24x7 Customer Support, Goa',
+    location: 'Smart ac solution Goa, Goa',
     rating: 5,
     order: 1,
     review:

@@ -93,7 +93,7 @@ async function getConfig() {
     enabled: truthy(map[ENABLED_KEY], false),
     recipients: valid,
     invalid,
-    companyName: map.company_name || '24x7 Customer Support',
+    companyName: map.company_name || 'Smart ac solution Goa',
     transportReady: mailer.isConfigured(),
     transportProblem: mailer.configProblem(),
   };

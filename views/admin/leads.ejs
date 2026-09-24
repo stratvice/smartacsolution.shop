@@ -136,7 +136,7 @@
               <button class="btn-a btn-sm-a btn-icon" title="View details" data-open-lead="<%= l.id %>"><i class="fa fa-eye"></i></button>
               <a class="btn-a btn-sm-a btn-icon" title="Call" href="tel:<%= digits %>"><i class="fa fa-phone"></i></a>
               <a class="btn-a btn-sm-a btn-icon" title="WhatsApp" target="_blank" rel="noopener"
-                 href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Hello ' + l.name + ', thank you for contacting 24x7 Customer Support regarding ' + (l.service || 'your enquiry') + '.') %>"><i class="fab fa-whatsapp"></i></a>
+                 href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Hello ' + l.name + ', thank you for contacting ' + company + ' regarding ' + (l.service || 'your enquiry') + '.') %>"><i class="fab fa-whatsapp"></i></a>
               <button class="btn-a btn-sm-a btn-icon btn-danger-a" title="Delete"
                       data-delete-lead="<%= l.id %>" data-confirm="Delete this lead permanently? This cannot be undone."><i class="fa fa-trash"></i></button>
             </div>
@@ -188,6 +188,7 @@
 (function () {
   'use strict';
   var A = window.Admin;
+  var COMPANY_NAME = <%- JSON.stringify(company) %>;
   var drawer = document.querySelector('[data-drawer]');
   var backdrop = document.querySelector('[data-drawer-backdrop]');
   var body = document.querySelector('[data-drawer-body]');
@@ -223,7 +224,7 @@
     document.querySelector('[data-drawer-call]').href = 'tel:' + digits;
     document.querySelector('[data-drawer-wa]').href =
       'https://wa.me/' + digits.replace(/^\+/, '') +
-      '?text=' + encodeURIComponent('Hello ' + lead.name + ', thank you for contacting 24x7 Customer Support.');
+      '?text=' + encodeURIComponent('Hello ' + lead.name + ', thank you for contacting ' + COMPANY_NAME + '.');
 
     var notes = (lead.leadNotes || []).map(function (n) {
       var who = n.admin ? (n.admin.name || n.admin.username) : 'system';

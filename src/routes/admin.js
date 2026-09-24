@@ -19,6 +19,20 @@ const { leadWhere, leadQuerySchema, STATUSES } = require('./api.admin');
 
 const router = express.Router();
 
+// Brand name for every admin view. Read here rather than threaded through each
+// render() call, because the login page renders from several places and before
+// any session exists. Falls back if the database is unreachable, so a DB outage
+// still shows a usable login screen rather than a template error.
+router.use(async (_req, res, next) => {
+  try {
+    const { map } = await getSettings();
+    res.locals.company = map.company_name || 'Smart ac solution Goa';
+  } catch {
+    res.locals.company = 'Smart ac solution Goa';
+  }
+  next();
+});
+
 const loginSchema = z.object({
   identifier: z.string().trim().min(1, 'Enter your email or username.').max(160),
   password: z.string().min(1, 'Enter your password.').max(200),

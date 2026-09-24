@@ -152,7 +152,7 @@ app.use((err, req, res, _next) => {
 // ------------------------------------------------------------------- boot
 const server = app.listen(env.port, () => {
   console.log(`\n  ${'='.repeat(52)}`);
-  console.log(`  24x7 Customer Support  —  ${env.nodeEnv}`);
+  console.log(`  Smart ac solution Goa  —  ${env.nodeEnv}`);
   console.log(`  Website      ${env.appUrl}`);
   console.log(`  Admin panel  ${env.appUrl}/admin`);
   console.log(`  Image store  ${require('./lib/storage').activeDriver()}`);
