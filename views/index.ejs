@@ -111,8 +111,11 @@
       ...(ratings.length ? { aggregateRating: { '@type': 'AggregateRating',
             ratingValue: (ratings.reduce(function (a, b) { return a + b }, 0) / ratings.length).toFixed(1),
             reviewCount: String(ratings.length) } } : {}),
+      // No areaServed per offer: the business-level one above already covers
+      // them, and repeating 31 places on each of 14 services added 18KB of
+      // markup, a third of the page, for nothing a consumer reads.
       ...(offeredServices.length ? { makesOffer: offeredServices.map(function (name) {
-            return { '@type': 'Offer', itemOffered: { '@type': 'Service', name: name, areaServed: schemaAreas.map(function (a) { return { '@type': 'Place', name: a }; }) } };
+            return { '@type': 'Offer', itemOffered: { '@type': 'Service', name: name } };
           }) } : {}),
     };
   %>
