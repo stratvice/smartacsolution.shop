@@ -243,8 +243,7 @@ const SECTIONS = [
       heading: 'Why Choose',
       highlight: 'GOA',
       headingSuffix: 'Service ?',
-      description:
-        "We don't just fix machines. We build trust. Our promise is punctuality, precision, and peace of mind for every household in {{state}}.",
+      description: COPY.intros.why,
       rating: '4.9',
       ratingLabel: 'Average Customer Rating',
       cards: [
@@ -354,8 +353,7 @@ const SECTIONS = [
       badgeIcon: 'fa fa-question-circle',
       heading: 'Frequently Asked',
       highlight: 'Questions',
-      description:
-        "Can't find your answer here? Just WhatsApp or call us directly. We're always happy to help!",
+      description: COPY.intros.faq,
       buttonText: 'Ask on WhatsApp',
       buttonLink: 'https://wa.me/' + PHONE_RAW,
       buttonIcon: 'fab fa-whatsapp',

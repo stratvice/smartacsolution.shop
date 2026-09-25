@@ -75,7 +75,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-copy-v2';
+const REVISION = '2026-09-25-copy-v3';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
@@ -174,6 +174,7 @@ async function main() {
   if (whyRow) {
     const why = scrubDeep({ ...whyRow.content });
     // The last card is a call-to-action tile, not a reason — leave it alone.
+    why.description = COPY.intros.why;
     const cards = why.cards || why.items || [];
     let i = 0;
     why[why.cards ? 'cards' : 'items'] = cards.map(function (card) {
@@ -185,9 +186,18 @@ async function main() {
     note('section why (card copy)');
   }
 
+  // --- FAQ heading: the intro line above the accordion ---------------------
+  const faqRow = await prisma.pageSection.findFirst({ where: { key: 'faq_header' } });
+  if (faqRow && faqRow.content && faqRow.content.description !== COPY.intros.faq) {
+    const faq = scrubDeep({ ...faqRow.content });
+    faq.description = COPY.intros.faq;
+    await prisma.pageSection.update({ where: { key: 'faq_header' }, data: { content: faq } });
+    note('section faq_header (intro copy)');
+  }
+
   // --- every other section, plus services/testimonials/faqs ----------------
   for (const s of await prisma.pageSection.findMany({})) {
-    if (s.key === 'hero' || s.key === 'about') continue;
+    if (s.key === 'hero' || s.key === 'about' || s.key === 'faq_header') continue;
     const next = scrubDeep(s.content);
     if (JSON.stringify(next) !== JSON.stringify(s.content)) {
       await prisma.pageSection.update({ where: { key: s.key }, data: { content: next } });

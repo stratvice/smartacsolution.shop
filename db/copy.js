@@ -37,6 +37,13 @@ module.exports = {
       'Cassette and multi-split systems in shops, restaurants, clinics and larger homes. These are the units that cannot be out of action for long. We diagnose on site, clean filters and coils properly rather than superficially, handle refrigerant and control-board work, and schedule servicing around your opening hours instead of ours.',
   },
 
+  // Section intros. These two sit above the card grids rather than in them,
+  // so apply-content-update.js has to set them explicitly.
+  intros: {
+    why: "We don't just fix machines. We build trust. Our promise is punctuality, precision, and peace of mind for every household in {{state}}.",
+    faq: "Can't find your answer here? Just WhatsApp or call us directly. We're always happy to help!",
+  },
+
   why: [
     'Every technician is trained and background-verified, and works on air conditioning specifically, not whatever appliance turned up that week.',
     'Book before noon and we aim to be with you the same day, anywhere in North or South Goa.',
