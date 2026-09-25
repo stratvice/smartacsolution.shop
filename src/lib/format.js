@@ -29,9 +29,16 @@ function waLink(phone, text) {
  * link is never passed off as the customer's doorstep.
  */
 function mapsLink(lead) {
-  const lat = Number(lead && lead.latitude);
-  const lon = Number(lead && lead.longitude);
-  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+  // A lead with no coordinates has null in those columns, and Number(null) is
+  // 0, which is a finite number off the coast of Africa. Rule the empties out
+  // before converting, or every lead without a location gets a pin there.
+  const rawLat = lead == null ? null : lead.latitude;
+  const rawLon = lead == null ? null : lead.longitude;
+  const hasCoords = rawLat !== null && rawLat !== undefined && rawLat !== '' &&
+                    rawLon !== null && rawLon !== undefined && rawLon !== '';
+  const lat = Number(rawLat);
+  const lon = Number(rawLon);
+  if (hasCoords && Number.isFinite(lat) && Number.isFinite(lon)) {
     return { href: `https://www.google.com/maps?q=${lat},${lon}`, precise: true };
   }
 

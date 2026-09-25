@@ -41,7 +41,10 @@
   <% if (S.seo_og_image) { %><meta property="og:image" content="<%= S.seo_og_image %>"/><% } %>
   <meta property="og:url" content="<%= canonical %>"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <% if (S.favicon_url) { %><link rel="icon" href="<%= S.favicon_url %>"<%= /.svg$/i.test(S.favicon_url) ? ' type="image/svg+xml"' : '' %>/>
+  <%# The type is emitted unescaped because it is markup, not text: escaping
+      turns its quotes into &#34; and breaks the tag. The value is a fixed
+      string, never anything an admin typed. %>
+  <% if (S.favicon_url) { %><link rel="icon" href="<%= S.favicon_url %>"<%- /\.svg$/i.test(S.favicon_url) ? ' type="image/svg+xml"' : '' %>/>
   <link rel="apple-touch-icon" href="<%= S.favicon_url %>"/><% } %>
   <%# Older browsers and crawlers ask for this by name whatever the tags say. %>
   <link rel="icon" href="/favicon.ico" sizes="32x32"/>
