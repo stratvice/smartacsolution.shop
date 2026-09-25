@@ -53,10 +53,56 @@ module.exports = {
     'Call or WhatsApp whenever something goes wrong, including evenings and Sundays, when most AC failures actually happen.',
   ],
 
+  // Every job the business actually takes. These drive the keyword list and
+  // the Service entries in the structured data, so a search engine can match
+  // "AC gas charging" even though the page only shows three service cards.
+  servicesOffered: [
+    'AC Service',
+    'AC Repair',
+    'AC Installation',
+    'AC Uninstallation',
+    'AC Gas Charging',
+    'AC Gas Leak Repair',
+    'AC Water Leakage',
+    'AC PCB Repair',
+    'AC Compressor Repair',
+    'AC Deep Cleaning',
+    'AC Maintenance',
+  ],
+
+  // Towns across both districts, for areaServed. This is the field that
+  // decides which "AC repair near me" searches the business is a candidate
+  // for, so it is worth listing properly rather than only "Goa".
+  serviceAreas: [
+    // North Goa
+    'Panaji', 'Mapusa', 'Porvorim', 'Calangute', 'Candolim', 'Anjuna', 'Baga',
+    'Siolim', 'Assagao', 'Arpora', 'Bicholim', 'Sanquelim', 'Valpoi', 'Pernem',
+    'Dona Paula', 'Taleigao', 'Ponda',
+    // South Goa
+    'Margao', 'Vasco da Gama', 'Mormugao', 'Colva', 'Benaulim', 'Verna',
+    'Cortalim', 'Quepem', 'Curchorem', 'Canacona', 'Sanguem',
+  ],
+
   seo: {
+    // Built from the two lists above so they can never drift: every service,
+    // then the town phrases people actually type. Google has ignored the
+    // keywords meta tag since 2009 -- this is here because it was asked for
+    // and some smaller engines and site searches still read it. The work that
+    // moves rankings is servicesOffered and serviceAreas reaching the
+    // structured data, and the page title below.
+    keywords: null, // filled in after the module is built
+
     description:
       'AC repair and service across North and South Goa. Split, window and cassette systems, every major brand. Same-day visits, genuine parts, 90-day warranty on all work.',
     ogDescription:
       'AC repair and service across North and South Goa. Same-day visits, genuine parts, and ninety days of warranty on every repair.',
   },
 };
+
+// Keywords are derived rather than typed out, so adding a town or a service
+// above is the only edit ever needed.
+module.exports.seo.keywords = []
+  .concat(module.exports.servicesOffered)
+  .concat(module.exports.serviceAreas.map(function (town) { return 'AC Repair in ' + town; }))
+  .concat(['AC repair Goa', 'AC service Goa', 'AC technician near me', 'split AC repair', 'window AC repair'])
+  .join(', ');

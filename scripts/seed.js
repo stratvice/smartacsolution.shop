@@ -77,7 +77,7 @@ const SETTINGS = [
 
   [
     'seo_title',
-    'Smart ac solution Goa | Home Appliance Repair Experts',
+    'AC Repair & Service in Goa | Smart ac solution Goa',
     'seo',
     'Page title',
     'text',
@@ -93,7 +93,7 @@ const SETTINGS = [
   ],
   [
     'seo_keywords',
-    'AC repair, split AC service, window AC repair, ductless AC repair, appliance repair',
+    COPY.seo.keywords,
     'seo',
     'Meta keywords',
     'textarea',
@@ -101,7 +101,7 @@ const SETTINGS = [
   ],
   [
     'seo_og_title',
-    'Smart ac solution Goa | Home Appliance Repair Experts',
+    'AC Repair & Service in Goa | Smart ac solution Goa',
     'seo',
     'OG title',
     'text',
@@ -116,6 +116,8 @@ const SETTINGS = [
     5,
   ],
   ['seo_og_image', '/images/abt_rep.webp', 'seo', 'OG image', 'image', 6],
+  ['seo_service_areas', COPY.serviceAreas.join('\n'), 'seo', 'Areas served (one per line)', 'textarea', 9],
+  ['seo_services_offered', COPY.servicesOffered.join('\n'), 'seo', 'Services offered (one per line)', 'textarea', 10],
   ['seo_canonical_url', '', 'seo', 'Canonical URL', 'url', 7],
   ['seo_robots', 'index, follow', 'seo', 'Robots directive', 'text', 8],
   ['analytics_ga4_id', '', 'seo', 'Google Analytics 4 measurement ID', 'text', 9],

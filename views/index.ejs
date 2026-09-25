@@ -62,7 +62,11 @@
     // now holds areas ("South Goa", "North Goa") rather than a street address,
     // so each line becomes a Place alongside the configured city and state.
     const areaLines = String(S.address || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-    const schemaAreas = [...new Set([...areaLines, S.default_city, S.default_state].filter(Boolean))];
+    const namedAreas = String(S.seo_service_areas || '')
+      .split('\n')
+      .map(function (a) { return a.trim(); })
+      .filter(Boolean);
+    const schemaAreas = [...new Set([...areaLines, ...namedAreas, S.default_city, S.default_state].filter(Boolean))];
     // Schema.org requires absolute URLs for images; a relative path is dropped.
     const abs = (u) => !u ? u : (/^https?:\/\//.test(u) ? u : canonical.replace(/\/$/, "") + (u.startsWith("/") ? u : "/" + u));
     // openingHours has a defined grammar ("Mo-Sa 08:00-20:00"). The admin field
@@ -74,6 +78,17 @@
     const countryRaw = S.default_country || "India";
     const country = COUNTRY_ISO[String(countryRaw).toLowerCase()] || countryRaw;
     const ratings = (testimonials || []).map(function (t) { return Number(t.rating) || 0 }).filter(Boolean);
+    const listedServices = String(S.seo_services_offered || '')
+      .split('\n')
+      .map(function (v) { return v.trim(); })
+      .filter(Boolean);
+    const offeredServices = [];
+    (services || []).map(function (svc) { return svc.title; }).concat(listedServices).forEach(function (name) {
+      if (!name) return;
+      var seen = offeredServices.some(function (kept) { return kept.toLowerCase() === name.toLowerCase(); });
+      if (!seen) offeredServices.push(name);
+    });
+
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'HVACBusiness',
@@ -96,8 +111,8 @@
       ...(ratings.length ? { aggregateRating: { '@type': 'AggregateRating',
             ratingValue: (ratings.reduce(function (a, b) { return a + b }, 0) / ratings.length).toFixed(1),
             reviewCount: String(ratings.length) } } : {}),
-      ...((services || []).length ? { makesOffer: services.map(function (s) {
-            return { '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.title } };
+      ...(offeredServices.length ? { makesOffer: offeredServices.map(function (name) {
+            return { '@type': 'Offer', itemOffered: { '@type': 'Service', name: name, areaServed: schemaAreas.map(function (a) { return { '@type': 'Place', name: a }; }) } };
           }) } : {}),
     };
   %>

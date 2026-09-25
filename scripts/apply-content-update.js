@@ -67,10 +67,15 @@ const SETTINGS = {
   sticky_cta_link: 'tel:' + PHONE_RAW,
   secondary_cta_text: 'Chat Now',
   secondary_cta_link: 'https://wa.link/pbjr74',
+  seo_keywords: COPY.seo.keywords,
+  seo_service_areas: COPY.serviceAreas.join('\n'),
+  seo_services_offered: COPY.servicesOffered.join('\n'),
   seo_description: COPY.seo.description,
   seo_og_description: COPY.seo.ogDescription,
-  seo_title: COMPANY + ' | Home Appliance Repair Experts',
-  seo_og_title: COMPANY + ' | Home Appliance Repair Experts',
+  // The old title said "Home Appliance Repair" for a business that only does
+  // air conditioning, and led with the brand name, which nobody searches for.
+  seo_title: 'AC Repair & Service in Goa | ' + COMPANY,
+  seo_og_title: 'AC Repair & Service in Goa | ' + COMPANY,
   seo_og_image: IMG.hero,
   favicon_url: IMG.favicon,
 };
@@ -85,7 +90,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-favicon';
+const REVISION = '2026-09-25-seo-keywords';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
@@ -94,9 +99,26 @@ const SOFT = process.argv.includes('--soft');
 const changes = [];
 const note = (s) => { changes.push(s); };
 
+/**
+ * Settings that did not exist when the site was first seeded. Without this the
+ * update could never introduce one: it only writes rows that already exist,
+ * and on a live database these are absent. The metadata mirrors scripts/seed.js
+ * so a created row lands in the right admin tab.
+ */
+const NEW_SETTINGS = {
+  seo_service_areas: { group: 'seo', label: 'Areas served (one per line)', type: 'textarea', order: 9 },
+  seo_services_offered: { group: 'seo', label: 'Services offered (one per line)', type: 'textarea', order: 10 },
+};
+
 async function setSetting(key, value) {
   const row = await prisma.siteSetting.findFirst({ where: { key } });
-  if (!row) { note(`setting ${key}: missing, skipped`); return; }
+  if (!row) {
+    const def = NEW_SETTINGS[key];
+    if (!def) { note(`setting ${key}: missing, skipped`); return; }
+    await prisma.siteSetting.create({ data: { key, value, ...def } });
+    note(`setting ${key} (created)`);
+    return;
+  }
   if (row.value === value) return;
   await prisma.siteSetting.update({ where: { key }, data: { value } });
   note(`setting ${key}`);
