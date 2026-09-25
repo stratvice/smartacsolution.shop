@@ -29,6 +29,10 @@ const IMG = {
     '/images/about-2-33f0d76e.png',
     '/images/about-3-0159e3cf.png',
   ],
+  // Service cards, keyed by slug. Only the cards listed here are touched.
+  services: {
+    "split-ac-repair": "/images/split-ac-repair-3e8924f6.png",
+  },
 };
 
 const SETTINGS = {
@@ -161,6 +165,7 @@ async function main() {
     for (const f of ['title', 'description', 'badge', 'buttonText', 'buttonLink', 'imageAlt']) {
       const n = scrub(r[f]); if (n !== r[f]) d[f] = n;
     }
+    if (IMG.services[r.slug] && r.imageUrl !== IMG.services[r.slug]) d.imageUrl = IMG.services[r.slug];
     if (Object.keys(d).length) { await prisma.service.update({ where: { id: r.id }, data: d }); note(`service #${r.id}`); }
   }
   for (const r of await prisma.testimonial.findMany({})) {
