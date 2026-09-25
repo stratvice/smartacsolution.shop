@@ -417,7 +417,7 @@ const SERVICES = [
       "Our expert technicians provide fast and reliable Split AC repair for all major brands, fixing cooling issues, water leakage, unusual noises, and electrical faults. We use quality spare parts and advanced tools to restore your AC's performance. Book same-day doorstep Split AC repair service for efficient and long-lasting cooling.",
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
-    buttonIcon: 'fab fa-whatsapp',
+    buttonIcon: 'fa fa-phone',
     order: 1,
   },
   {
@@ -432,7 +432,7 @@ const SERVICES = [
       'Our experienced technicians provide reliable Window AC repair services for all major brands, resolving cooling issues, water leakage, compressor problems, and electrical faults. We ensure quick diagnosis, quality repairs, and efficient performance. Book same-day doorstep Window AC repair for fast, affordable, and dependable service.',
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
-    buttonIcon: 'fab fa-whatsapp',
+    buttonIcon: 'fa fa-phone',
     order: 2,
   },
   {
@@ -447,7 +447,7 @@ const SERVICES = [
       'Our skilled technicians offer professional Ductless AC repair services for all major brands, fixing cooling problems, sensor faults, refrigerant leaks, and electrical issues. We provide accurate diagnostics, quality repairs, and genuine spare parts to restore peak performance. Schedule same-day doorstep Ductless AC repair for reliable and energy-efficient cooling.',
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
-    buttonIcon: 'fab fa-whatsapp',
+    buttonIcon: 'fa fa-phone',
     order: 3,
   },
 ];

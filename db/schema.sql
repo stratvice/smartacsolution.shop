@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `services` (
     `imageAlt` VARCHAR(191) NULL,
     `buttonText` VARCHAR(191) NOT NULL DEFAULT 'Call Now',
     `buttonLink` VARCHAR(191) NOT NULL DEFAULT '#contact',
-    `buttonIcon` VARCHAR(191) NOT NULL DEFAULT 'fab fa-whatsapp',
+    `buttonIcon` VARCHAR(191) NOT NULL DEFAULT 'fa fa-phone',
     `order` INTEGER NOT NULL DEFAULT 0,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
