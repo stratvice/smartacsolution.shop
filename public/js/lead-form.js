@@ -39,7 +39,12 @@
     var field = form.querySelector('[name="' + name + '"]');
     if (!field) return false;
     field.classList.add('is-invalid');
-    var fb = field.parentElement.querySelector('.invalid-feedback');
+    // Inputs sit inside a .field wrapper (for the icon and the Detect
+    // button), so the message element is a sibling of that wrapper rather
+    // than of the input itself.
+    var wrap = field.closest('.field');
+    var group = wrap ? wrap.parentElement : field.parentElement;
+    var fb = group && group.querySelector('.invalid-feedback');
     if (fb) {
       fb.textContent = message;
       fb.style.cssText = 'display:block;color:#b42318;font-size:0.8rem;margin-top:4px;';

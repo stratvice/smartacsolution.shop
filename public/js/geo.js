@@ -69,9 +69,6 @@
     set('[data-loc-src]', location.source || '');
     if (location.latitude != null) set('[data-loc-lat]', location.latitude);
     if (location.longitude != null) set('[data-loc-lon]', location.longitude);
-
-    var cityInput = document.querySelector('[data-loc-city]');
-    if (cityInput && !cityInput.value) cityInput.placeholder = 'Your city';
   }
 
   /** Swap {{city}} / {{state}} tokens in any element carrying data-loc-text. */
@@ -173,6 +170,72 @@
     useDefaults();
   }
 
+  /**
+   * The Detect button on the lead form.
+   *
+   * start() asks at most once per visitor, which is right for a prompt nobody
+   * requested. This is the opposite case: the visitor is filling in the form
+   * and has asked to be located, so it always asks, and it fills the visible
+   * area field -- which start() deliberately leaves alone.
+   */
+  function bindDetect() {
+    var btn = document.querySelector('[data-loc-detect]');
+    if (!btn) return;
+
+    var label = btn.querySelector('[data-loc-detect-label]') || btn;
+    var original = label.textContent;
+    var area = document.querySelector('[data-loc-area]');
+    var reset = null;
+
+    var say = function (text, keep) {
+      label.textContent = text;
+      if (reset) clearTimeout(reset);
+      if (!keep) reset = setTimeout(function () { label.textContent = original; }, 2500);
+    };
+
+    var done = function () { btn.disabled = false; };
+
+    btn.addEventListener('click', function () {
+      if (!navigator.geolocation || !window.isSecureContext) {
+        say('Unavailable');
+        return;
+      }
+
+      btn.disabled = true;
+      say('Detecting…', true);
+
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          var lat = pos.coords.latitude;
+          var lon = pos.coords.longitude;
+          resolveOnServer('?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon)).then(function (location) {
+            done();
+            if (!location) { say('Try again'); return; }
+
+            location.latitude = lat;
+            location.longitude = lon;
+            remember(location);
+            apply(location);
+
+            // apply() skips a field the visitor has typed in; an explicit
+            // request to detect overrides that.
+            if (area) {
+              var text = location.city || '';
+              if (location.state && location.state !== location.city) text += (text ? ', ' : '') + location.state;
+              if (text) { area.value = text; area.dataset.touched = '1'; }
+            }
+            say('Detected');
+          });
+        },
+        function () {
+          done();
+          say('Not allowed');
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+      );
+    });
+  }
+
   // Mark fields the visitor edits so detection never overwrites their input.
   document.addEventListener(
     'input',
@@ -185,9 +248,14 @@
     true
   );
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
+  function init() {
+    bindDetect();
     start();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();

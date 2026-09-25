@@ -1746,6 +1746,103 @@ margin-right:30px;
     appearance:none;
 }
 
+/* Lead form fields.
+
+   Each control sits in a .field wrapper so its icon can be positioned inside
+   the box rather than beside it, and so the Detect button can sit on top of
+   the location input instead of stealing a grid column from it. */
+.contact-form label{
+    font-size:.85rem;
+    color:var(--navy);
+    font-weight:600;
+    margin-bottom:.35rem;
+}
+
+.contact-form .field{
+    position:relative;
+}
+
+/* The original stylesheet styles bare controls (it predates this markup) and
+   its selector reaches text inputs, selects and textareas but not type="tel"
+   or type="email". That left half the fields with a tinted fill and 20px of
+   dead space under them and half without. Give every control the same. */
+.contact-form .field .form-control{
+    margin-bottom:0;
+    background:#f9fbfd;
+    color:#333;
+}
+
+.contact-form .field .form-control:focus{
+    background:#fff;
+}
+
+.contact-form .field .form-control{
+    padding-left:46px;
+}
+
+/* The select carries a caret rather than a leading icon, so it still reads as
+   a dropdown once appearance:none has removed the native one. */
+.contact-form .field select.form-control{
+    padding-left:18px;
+    padding-right:44px;
+}
+
+.contact-form .field-icon{
+    position:absolute;
+    left:17px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--gray);
+    font-size:.95rem;
+    pointer-events:none;
+}
+
+/* A textarea grows downwards, so its icon anchors to the first line. */
+.contact-form .field-icon-top{
+    top:18px;
+    transform:none;
+}
+
+.contact-form .field-caret{
+    position:absolute;
+    right:18px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--gray);
+    font-size:.8rem;
+    pointer-events:none;
+}
+
+/* Leave room for the Detect button so a long area name never runs under it. */
+.contact-form .form-control.has-action{
+    padding-right:104px;
+}
+
+.btn-detect{
+    position:absolute;
+    right:6px;
+    top:50%;
+    transform:translateY(-50%);
+    border:none;
+    background:linear-gradient(135deg,#00a8a8,#007d7d);
+    color:#fff;
+    font-size:.78rem;
+    font-weight:600;
+    padding:9px 14px;
+    border-radius:9px;
+    white-space:nowrap;
+    transition:.25s;
+}
+
+.btn-detect:hover:not(:disabled){
+    filter:brightness(1.08);
+}
+
+.btn-detect:disabled{
+    opacity:.65;
+    cursor:default;
+}
+
 .btn-submit{
     background:linear-gradient(135deg,#ff9800,#ff6b00);
     color:#fff;

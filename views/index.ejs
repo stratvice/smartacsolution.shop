@@ -466,44 +466,65 @@
           <form id="leadForm" method="post" action="/api/leads" novalidate>
           <div class="row g-3">
             <div class="col-sm-6">
-              <label class="form-label fw-600" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Full Name</label>
-              <input type="text" name="name" class="form-control" placeholder="Your full name" required minlength="2" maxlength="120"/>
+              <label class="form-label" for="lf-name">Full Name</label>
+              <div class="field">
+                <i class="fa fa-user field-icon" aria-hidden="true"></i>
+                <input type="text" id="lf-name" name="name" class="form-control" placeholder="Enter name" required minlength="2" maxlength="120"/>
+              </div>
               <div class="invalid-feedback"></div>
             </div>
             <div class="col-sm-6">
-              <label class="form-label fw-600" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Phone Number</label>
-              <input type="tel"  name="phone" class="form-control" placeholder="+91 XXXXXXXXXX" required minlength="7" maxlength="25"/>
+              <label class="form-label" for="lf-phone">Phone Number</label>
+              <div class="field">
+                <i class="fa fa-phone field-icon" aria-hidden="true"></i>
+                <input type="tel" id="lf-phone" name="phone" class="form-control" placeholder="Enter number" required minlength="7" maxlength="25"/>
+              </div>
               <div class="invalid-feedback"></div>
             </div>
             <div class="col-sm-6">
-              <label class="form-label"  style="font-size:0.85rem;color:var(--navy);font-weight:600;">Email <span style="font-weight:400;color:var(--gray);">(optional)</span></label>
-              <input type="email" name="email" class="form-control" placeholder="you@example.com" maxlength="160"/>
+              <label class="form-label" for="lf-email">Email Address</label>
+              <div class="field">
+                <i class="fa fa-envelope field-icon" aria-hidden="true"></i>
+                <input type="email" id="lf-email" name="email" class="form-control" placeholder="Enter email" maxlength="160"/>
+              </div>
               <div class="invalid-feedback"></div>
             </div>
             <div class="col-sm-6">
-              <label class="form-label"  style="font-size:0.85rem;color:var(--navy);font-weight:600;">Appliance Type</label>
-              <select class="form-control" name="service">
-                <option value="">Select Appliance</option>
-                <% services.forEach(function (s) { %><option value="<%= s.title %>"><%= s.title %></option><% }); %>
-              </select>
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Your Area</label>
-              <input type="text" name="area" class="form-control" placeholder="e.g. Panaji, Mapusa" maxlength="120" data-loc-area/>
-            </div>
-            <div class="col-sm-6">
-              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">City</label>
-              <input type="text" name="city" class="form-control" placeholder="Your city" maxlength="120" data-loc-city value="<%= loc.city || defaults.city || '' %>"/>
+              <label class="form-label" for="lf-area">Location / Area</label>
+              <div class="field">
+                <i class="fa fa-map-marker-alt field-icon" aria-hidden="true"></i>
+                <input type="text" id="lf-area" name="area" class="form-control has-action" placeholder="Location" maxlength="120" data-loc-area/>
+                <%# The page asks for location once per visitor at most. This
+                    gives a visitor who declined, or who cleared the prompt
+                    without answering, a way to ask for it deliberately. %>
+                <button type="button" class="btn-detect" data-loc-detect>
+                  <i class="fa fa-location-crosshairs me-1" aria-hidden="true"></i><span data-loc-detect-label>Detect</span>
+                </button>
+              </div>
             </div>
             <div class="col-12">
-              <label class="form-label" style="font-size:0.85rem;color:var(--navy);font-weight:600;">Describe the Issue</label>
-              <textarea class="form-control" name="message" rows="4" placeholder="Tell us what's wrong with your appliance..." maxlength="2000"></textarea>
+              <label class="form-label" for="lf-service">Service Type</label>
+              <div class="field">
+                <select class="form-control" id="lf-service" name="service">
+                  <option value="">Select Service Type</option>
+                  <% services.forEach(function (s) { %><option value="<%= s.title %>"><%= s.title %></option><% }); %>
+                </select>
+                <i class="fa fa-chevron-down field-caret" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="lf-message">Message <span style="font-weight:400;color:var(--gray);">(Optional)</span></label>
+              <div class="field">
+                <i class="fa fa-comment-dots field-icon field-icon-top" aria-hidden="true"></i>
+                <textarea class="form-control" id="lf-message" name="message" rows="4" placeholder="Describe your problem here......" maxlength="2000"></textarea>
+              </div>
             </div>
 
             <!-- anti-spam: hidden from humans, filled only by bots -->
             <div style="position:absolute;left:-9999px;" aria-hidden="true">
               <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
             </div>
+            <input type="hidden" name="city" data-loc-city value="<%= loc.city || defaults.city || '' %>"/>
             <input type="hidden" name="state" data-loc-state value="<%= loc.state || '' %>"/>
             <input type="hidden" name="country" data-loc-country value="<%= loc.country || '' %>"/>
             <input type="hidden" name="latitude" data-loc-lat value=""/>
