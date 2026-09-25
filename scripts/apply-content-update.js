@@ -41,7 +41,13 @@ const IMG = {
   },
 };
 
+// Notification recipients. These are admin-editable, so this sets them once
+// and then leaves them alone like every other value here.
+const LEAD_EMAILS = ['smartacsolution.shop@gmail.com', 'vikash.stratvice@gmail.com'].join('\n');
+
 const SETTINGS = {
+  lead_email_enabled: 'true',
+  lead_email_recipients: LEAD_EMAILS,
   company_name: COMPANY,
   company_name_accent: 'Goa',
   phone: PHONE,
@@ -75,7 +81,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-copy-v3';
+const REVISION = '2026-09-25-lead-emails';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */

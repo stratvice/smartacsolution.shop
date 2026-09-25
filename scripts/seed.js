@@ -11,6 +11,10 @@ const prisma = require('../src/lib/prisma');
 // cannot drift apart.
 const COPY = require('../db/copy');
 
+// Who gets told about a new lead. One address per line; the notifier accepts
+// commas and semicolons too, and drops duplicates.
+const LEAD_EMAILS = ['smartacsolution.shop@gmail.com', 'vikash.stratvice@gmail.com'].join('\n');
+
 const PHONE = '+91 93688 13078';
 const PHONE_RAW = '+919368813078';
 const EMAIL = 'smartacsolution.shop@gmail.com';
@@ -119,8 +123,8 @@ const SETTINGS = [
 
   // Lead email notifications. Recipients are deliberately empty by default —
   // addresses are configured in Admin → Settings, never hard-coded here.
-  ['lead_email_enabled', 'false', 'notifications', 'Lead email notifications', 'text', 1],
-  ['lead_email_recipients', '', 'notifications', 'Notification emails', 'textarea', 2],
+  ['lead_email_enabled', 'true', 'notifications', 'Lead email notifications', 'text', 1],
+  ['lead_email_recipients', LEAD_EMAILS, 'notifications', 'Notification emails', 'textarea', 2],
 ];
 
 // --------------------------------------------------------------- sections
