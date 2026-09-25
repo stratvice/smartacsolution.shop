@@ -75,7 +75,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-rewritten-copy';
+const REVISION = '2026-09-25-copy-v2';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */

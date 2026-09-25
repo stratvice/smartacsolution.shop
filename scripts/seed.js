@@ -224,7 +224,7 @@ const SECTIONS = [
   },
   {
     key: 'services_header',
-    label: 'Services — heading',
+    label: 'Services heading',
     order: 5,
     content: {
       badge: 'What We Fix',
@@ -244,7 +244,7 @@ const SECTIONS = [
       highlight: 'GOA',
       headingSuffix: 'Service ?',
       description:
-        "We don't just fix machines — we build trust. Our promise is punctuality, precision, and peace of mind for every household in {{state}}.",
+        "We don't just fix machines. We build trust. Our promise is punctuality, precision, and peace of mind for every household in {{state}}.",
       rating: '4.9',
       ratingLabel: 'Average Customer Rating',
       cards: [
@@ -335,7 +335,7 @@ const SECTIONS = [
   },
   {
     key: 'testimonials_header',
-    label: 'Testimonials — heading',
+    label: 'Testimonials heading',
     order: 8,
     content: {
       badge: 'Customer Reviews',
@@ -347,7 +347,7 @@ const SECTIONS = [
   },
   {
     key: 'faq_header',
-    label: 'FAQ — heading',
+    label: 'FAQ heading',
     order: 9,
     content: {
       badge: 'FAQ',
@@ -355,7 +355,7 @@ const SECTIONS = [
       heading: 'Frequently Asked',
       highlight: 'Questions',
       description:
-        "Can't find your answer here? Just WhatsApp or call us directly — we're always happy to help!",
+        "Can't find your answer here? Just WhatsApp or call us directly. We're always happy to help!",
       buttonText: 'Ask on WhatsApp',
       buttonLink: 'https://wa.me/' + PHONE_RAW,
       buttonIcon: 'fab fa-whatsapp',
