@@ -69,9 +69,9 @@
 
   /** The enquiry, formatted for a phone screen rather than an inbox. */
   function whatsappText(data) {
-    var lines = ['New service request', ''];
+    var lines = ['*New service request*'];
     var add = function (label, value) {
-      if (value) lines.push(label + ' - ' + value);
+      if (value) lines.push('', '*' + label + '* - ' + value);
     };
 
     add('Name', data.name);
@@ -134,8 +134,7 @@
     }
 
     setTimeout(function () {
-      var opened = window.open(url, '_blank');
-      if (!opened) window.location.href = url; // pop-up blocked
+      window.location.href = url;
     }, 1500);
   }
 
