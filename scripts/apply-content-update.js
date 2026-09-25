@@ -15,6 +15,7 @@
 require('../src/config/load-env');
 const prisma = require('../src/lib/prisma');
 const content = require('../src/services/content');
+const COPY = require('../db/copy');
 
 const PHONE = '+91 93688 13078';
 const PHONE_RAW = '+919368813078';
@@ -57,6 +58,8 @@ const SETTINGS = {
   sticky_cta_link: 'tel:' + PHONE_RAW,
   secondary_cta_text: 'Chat Now',
   secondary_cta_link: 'https://wa.link/pbjr74',
+  seo_description: COPY.seo.description,
+  seo_og_description: COPY.seo.ogDescription,
   seo_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_image: IMG.hero,
@@ -72,7 +75,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-chat-now';
+const REVISION = '2026-09-25-rewritten-copy';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
@@ -138,6 +141,7 @@ async function main() {
     hero.secondaryBtnText = 'Chat Now';
     hero.secondaryBtnLink = 'https://wa.link/pbjr74';
     hero.secondaryBtnIcon = 'fab fa-whatsapp';
+    hero.description = COPY.hero.description;
     hero.stats = [
       { value: 9000, label: 'Jobs Done', accent: false },
       { value: 8500, label: 'Happy Customers', accent: true },
@@ -152,6 +156,10 @@ async function main() {
   if (aboutRow) {
     const about = scrubDeep({ ...aboutRow.content });
     about.images = (about.images || []).map((img, i) => ({ ...img, url: IMG.about[i] || img.url }));
+    about.description = COPY.about.description;
+    about.features = (about.features || []).map(function (ft, i) {
+      return COPY.about.features[i] ? { ...ft, description: COPY.about.features[i] } : ft;
+    });
     about.stats = [
       { value: 9000, label: 'Work Done' },
       { value: 8500, label: 'Clients' },
@@ -159,6 +167,22 @@ async function main() {
     ];
     await prisma.pageSection.update({ where: { key: 'about' }, data: { content: about } });
     note('section about (images, counters)');
+  }
+
+  // --- why section: card copy ----------------------------------------------
+  const whyRow = await prisma.pageSection.findFirst({ where: { key: 'why' } });
+  if (whyRow) {
+    const why = scrubDeep({ ...whyRow.content });
+    // The last card is a call-to-action tile, not a reason — leave it alone.
+    const cards = why.cards || why.items || [];
+    let i = 0;
+    why[why.cards ? 'cards' : 'items'] = cards.map(function (card) {
+      const next = COPY.why[i];
+      i += 1;
+      return next ? { ...card, description: next } : card;
+    });
+    await prisma.pageSection.update({ where: { key: 'why' }, data: { content: why } });
+    note('section why (card copy)');
   }
 
   // --- every other section, plus services/testimonials/faqs ----------------
@@ -177,6 +201,7 @@ async function main() {
     }
     if (IMG.services[r.slug] && r.imageUrl !== IMG.services[r.slug]) d.imageUrl = IMG.services[r.slug];
     if (/^tel:/i.test(r.buttonLink || "") && r.buttonIcon !== IMG.serviceButtonIcon) d.buttonIcon = IMG.serviceButtonIcon;
+    if (COPY.services[r.slug] && r.description !== COPY.services[r.slug]) d.description = COPY.services[r.slug];
     if (Object.keys(d).length) { await prisma.service.update({ where: { id: r.id }, data: d }); note(`service #${r.id}`); }
   }
   for (const r of await prisma.testimonial.findMany({})) {

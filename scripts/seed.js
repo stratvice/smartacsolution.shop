@@ -7,6 +7,9 @@
  * an already-edited value is never clobbered.
  */
 const prisma = require('../src/lib/prisma');
+// Site prose lives in db/copy.js so the seed and the live content update
+// cannot drift apart.
+const COPY = require('../db/copy');
 
 const PHONE = '+91 93688 13078';
 const PHONE_RAW = '+919368813078';
@@ -78,7 +81,7 @@ const SETTINGS = [
   ],
   [
     'seo_description',
-    'Fast, reliable and affordable AC repair and home appliance service. Same-day doorstep service, certified technicians, 90-day warranty.',
+    COPY.seo.description,
     'seo',
     'Meta description',
     'textarea',
@@ -102,7 +105,7 @@ const SETTINGS = [
   ],
   [
     'seo_og_description',
-    'Fast, reliable, and affordable home appliance repair. One call, we fix it all.',
+    COPY.seo.ogDescription,
     'seo',
     'OG description',
     'textarea',
@@ -140,8 +143,7 @@ const SECTIONS = [
       connector: '&',
       highlight2: 'Ac Service',
       headingSuffix: 'Experts',
-      description:
-        'Fast, reliable, and affordable home appliance repair — Air Conditioner. One call, we fix it all.',
+      description: COPY.hero.description,
       imageUrl: '/images/abt_rep.webp',
       imageAlt: 'Smart ac solution Goa',
       primaryBtnText: 'Book Now',
@@ -182,8 +184,7 @@ const SECTIONS = [
       heading: 'Welcome to',
       highlight: COMPANY,
       headingSuffix: 'Service',
-      description:
-        "At Smart ac solution Goa, we understand your home runs on the reliability of your appliances. When a machine breaks down, it's not just a technical glitch — it's a disruption to your daily life. We're dedicated to providing fast, professional, and transparent repair services that get your household back on track.",
+      description: COPY.about.description,
       images: [
         { url: '/images/images.jfif', alt: 'Technician at work' },
         { url: '/images/06b00d1f-11a8-47ac-9a74-12daf4974349_.jpg', alt: 'AC repair' },
@@ -195,21 +196,21 @@ const SECTIONS = [
           style: 'icon-orange',
           title: 'Expert Technicians',
           description:
-            'Our team holds certifications and brings years of hands-on experience to every job.',
+            COPY.about.features[0],
         },
         {
           icon: 'fa fa-clock',
           style: 'icon-teal',
           title: 'Same-Day Service',
           description:
-            'Quick response times — round-the-clock availability is a promise, not a slogan.',
+            COPY.about.features[1],
         },
         {
           icon: 'fa fa-rupee-sign',
           style: 'icon-orange',
           title: 'Transparent Pricing',
           description:
-            'Upfront, competitive pricing with zero hidden costs. What we quote is what you pay.',
+            COPY.about.features[2],
         },
       ],
       stats: [
@@ -252,40 +253,40 @@ const SECTIONS = [
           accent: 'orange',
           title: 'Certified Experts',
           description:
-            'All our technicians are trained, certified, and background-verified for your complete safety.',
+            COPY.why[0],
         },
         {
           icon: 'fa fa-bolt',
           accent: 'teal',
           title: 'Same Day Service',
           description:
-            'Book before noon — we arrive the same day. Speed is our signature, not just our name.',
+            COPY.why[1],
         },
         {
           icon: 'fa fa-shield-alt',
           accent: 'orange',
           title: '90-Day Warranty',
           description:
-            'All repairs backed by a 90-day service warranty. If it breaks again, we fix it free.',
+            COPY.why[2],
         },
         {
           icon: 'fa fa-rupee-sign',
           accent: 'teal',
           title: 'Upfront Pricing',
-          description: 'No surprises. We quote before we start. Zero hidden costs, zero confusion.',
+          description: COPY.why[3],
         },
         {
           icon: 'fa fa-tools',
           accent: 'orange',
           title: 'Genuine Parts Only',
           description:
-            'We use only OEM-approved spare parts so your appliances last longer after repair.',
+            COPY.why[4],
         },
         {
           icon: 'fa fa-headset',
           accent: 'teal',
           title: '24/7 Support',
-          description: 'Call us or WhatsApp anytime. Our support team is always ready to assist you.',
+          description: COPY.why[5],
         },
       ],
     },
@@ -413,8 +414,7 @@ const SERVICES = [
     iconStyle: '',
     imageUrl: '/images/split-ac-service.webp',
     imageAlt: 'AC Repair',
-    description:
-      "Our expert technicians provide fast and reliable Split AC repair for all major brands, fixing cooling issues, water leakage, unusual noises, and electrical faults. We use quality spare parts and advanced tools to restore your AC's performance. Book same-day doorstep Split AC repair service for efficient and long-lasting cooling.",
+    description: COPY.services['split-ac-repair'],
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
     buttonIcon: 'fa fa-phone',
@@ -428,8 +428,7 @@ const SERVICES = [
     iconStyle: 'background: linear-gradient(135deg, var(--teal), var(--teal-dark))',
     imageUrl: '/images/window-ac-repair.webp',
     imageAlt: 'Window AC Repair',
-    description:
-      'Our experienced technicians provide reliable Window AC repair services for all major brands, resolving cooling issues, water leakage, compressor problems, and electrical faults. We ensure quick diagnosis, quality repairs, and efficient performance. Book same-day doorstep Window AC repair for fast, affordable, and dependable service.',
+    description: COPY.services['window-ac-repair'],
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
     buttonIcon: 'fa fa-phone',
@@ -443,8 +442,7 @@ const SERVICES = [
     iconStyle: '',
     imageUrl: '/images/ductless.webp',
     imageAlt: 'Ductless AC Repair',
-    description:
-      'Our skilled technicians offer professional Ductless AC repair services for all major brands, fixing cooling problems, sensor faults, refrigerant leaks, and electrical issues. We provide accurate diagnostics, quality repairs, and genuine spare parts to restore peak performance. Schedule same-day doorstep Ductless AC repair for reliable and energy-efficient cooling.',
+    description: COPY.services['ductless-ac-repair'],
     buttonText: 'Call Now',
     buttonLink: 'tel:' + PHONE_RAW,
     buttonIcon: 'fa fa-phone',
