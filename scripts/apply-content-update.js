@@ -32,6 +32,8 @@ const IMG = {
   // Service cards, keyed by slug. Only the cards listed here are touched.
   services: {
     "split-ac-repair": "/images/split-ac-repair-3e8924f6.png",
+    "window-ac-repair": "/images/window-ac-repair-665d7da3.png",
+    "ductless-ac-repair": "/images/ductless-ac-repair-dce871a9.png",
   },
 };
 
@@ -65,7 +67,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-rebrand';
+const REVISION = '2026-09-25-service-images';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
