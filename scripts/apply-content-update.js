@@ -51,6 +51,22 @@ const SETTINGS = {
   seo_og_image: IMG.hero,
 };
 
+/**
+ * This runs from postinstall so the content lands without shell access to the
+ * server. It must therefore run EXACTLY ONCE: re-applying on every deploy
+ * would overwrite anything later edited in the admin panel, which is the very
+ * thing db:seed's no-clobber rule protects against.
+ *
+ * A marker row records that this revision has been applied. Bump REVISION only
+ * when there is a new one-off content change to push.
+ */
+const MARKER_KEY = 'content_update_rev';
+const REVISION = '2026-09-25-rebrand';
+
+/** --soft: never fail the build. A deploy must not break because the database
+ *  was briefly unreachable; the update can be run again by hand. */
+const SOFT = process.argv.includes('--soft');
+
 const changes = [];
 const note = (s) => { changes.push(s); };
 
@@ -84,6 +100,13 @@ function scrubDeep(v) {
 }
 
 async function main() {
+  const marker = await prisma.siteSetting.findFirst({ where: { key: MARKER_KEY } });
+  if (marker && marker.value === REVISION) {
+    console.log(`[content] revision ${REVISION} already applied — nothing to do.`);
+    console.log('[content] admin edits since then are left untouched.');
+    return;
+  }
+
   for (const [k, v] of Object.entries(SETTINGS)) await setSetting(k, v);
 
   // Any remaining stale mentions in other settings (footer text, SEO copy…).
@@ -151,6 +174,16 @@ async function main() {
     if (Object.keys(d).length) { await prisma.faq.update({ where: { id: r.id }, data: d }); note(`faq #${r.id}`); }
   }
 
+  // Record the revision so this never runs a second time and starts fighting
+  // with edits made in the admin panel.
+  if (marker) {
+    await prisma.siteSetting.update({ where: { key: MARKER_KEY }, data: { value: REVISION } });
+  } else {
+    await prisma.siteSetting.create({
+      data: { key: MARKER_KEY, value: REVISION, group: 'general', label: 'Content revision applied', type: 'text', order: 99 },
+    });
+  }
+
   content.invalidate();
 
   console.log(changes.length ? `\n${changes.length} change(s):` : '\nAlready up to date — nothing changed.');
@@ -167,5 +200,11 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error('content update failed:', e.message); process.exitCode = 1; })
+  .catch((e) => {
+    console.error('[content] update failed:', e.message);
+    // Under --soft (postinstall) a failure must not fail the deploy: the site
+    // still runs, and the update can be re-run by hand or on the next deploy.
+    if (!SOFT) process.exitCode = 1;
+    else console.error('[content] continuing anyway (--soft); re-run to retry.');
+  })
   .finally(() => prisma.$disconnect());
