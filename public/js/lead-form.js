@@ -67,6 +67,78 @@
     return errors;
   }
 
+  /** The enquiry, formatted for a phone screen rather than an inbox. */
+  function whatsappText(data) {
+    var lines = ['New service request', ''];
+    var add = function (label, value) {
+      if (value) lines.push(label + ' - ' + value);
+    };
+
+    add('Name', data.name);
+    add('Number', data.phone);
+    add('Mail', data.email);
+
+    // A map pin only exists if the visitor granted location or pressed Detect.
+    if (data.latitude && data.longitude) {
+      add('Location link', 'https://maps.google.com/?q=' + data.latitude + ',' + data.longitude);
+    }
+    // Detect writes "Panaji, Goa" into the area field while city and state
+    // hold the same two words, so compare the parts rather than the strings
+    // or the line comes out as "Panaji, Goa, Panaji, Goa".
+    var place = [];
+    String(data.area || '')
+      .split(',')
+      .concat([data.city, data.state])
+      .forEach(function (part) {
+        var value = String(part || '').trim();
+        if (!value) return;
+        var seen = place.some(function (kept) {
+          return kept.toLowerCase() === value.toLowerCase();
+        });
+        if (!seen) place.push(value);
+      });
+    add('Location', place.join(', '));
+
+    add('Service', data.service);
+    add('Message', data.message);
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Hand the enquiry to WhatsApp once it is safely saved.
+   *
+   * This opens the visitor's own WhatsApp with the message written out and
+   * addressed to the business; they still press send. Sending on their behalf
+   * would need a WhatsApp Business API account, so this cannot be relied on as
+   * the notification -- it is a shortcut, and the lead is already in the
+   * database either way.
+   */
+  function handOffToWhatsApp(data) {
+    var number = (form.getAttribute('data-wa-number') || '').replace(/\D/g, '');
+    if (!number) return;
+
+    var url = 'https://wa.me/' + number + '?text=' + encodeURIComponent(whatsappText(data));
+
+    // Offer the link as well as opening it: a pop-up blocker can stop the
+    // call below, and the visitor may want it on a different device.
+    if (msgBox) {
+      var link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Open WhatsApp';
+      link.style.cssText = 'display:inline-block;margin-top:10px;font-weight:700;color:#067647;text-decoration:underline;';
+      msgBox.appendChild(document.createElement('br'));
+      msgBox.appendChild(link);
+    }
+
+    setTimeout(function () {
+      var opened = window.open(url, '_blank');
+      if (!opened) window.location.href = url; // pop-up blocked
+    }, 1500);
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (submitting) return;
@@ -130,6 +202,7 @@
             result.body.message || "Thank you! We've received your request and will call you back shortly.",
             'success'
           );
+          handOffToWhatsApp(data);
           if (button) {
             button.innerHTML = '<i class="fa fa-check me-2"></i>Message Sent!';
             button.style.background = '#25D366';
@@ -158,7 +231,7 @@
         );
       })
       .catch(function () {
-        setMessage('Network error — please check your connection or call us directly.', 'error');
+        setMessage('Network error. Please check your connection or call us directly.', 'error');
       })
       .finally(function () {
         submitting = false;

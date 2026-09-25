@@ -463,7 +463,7 @@
       </div>
       <div class="col-lg-8" data-aos="fade-left">
         <div class="contact-form bg-white p-4 p-lg-5 rounded-4 shadow-sm">
-          <form id="leadForm" method="post" action="/api/leads" novalidate>
+          <form id="leadForm" method="post" action="/api/leads" novalidate data-wa-number="<%= fmt.phoneDigits(S.whatsapp || phone) %>">
           <div class="row g-3">
             <div class="col-sm-6">
               <label class="form-label" for="lf-name">Full Name</label>
