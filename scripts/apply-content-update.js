@@ -33,6 +33,9 @@ const IMG = {
   // Call Now buttons dial a tel: link, so they take a phone icon. The FAQ
   // "Ask on WhatsApp" button genuinely opens WhatsApp and keeps its own icon.
   serviceButtonIcon: "fa fa-phone",
+  // Content-hashed, so replacing the artwork changes the name and no browser
+  // serves a stale one.
+  favicon: "/images/favicon-08773094.svg",
   // Service cards, keyed by slug. Only the cards listed here are touched.
   services: {
     "split-ac-repair": "/images/split-ac-repair-3e8924f6.png",
@@ -69,6 +72,7 @@ const SETTINGS = {
   seo_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_image: IMG.hero,
+  favicon_url: IMG.favicon,
 };
 
 /**
@@ -81,7 +85,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-lead-emails';
+const REVISION = '2026-09-25-favicon';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */

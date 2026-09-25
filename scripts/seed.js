@@ -28,7 +28,7 @@ const SETTINGS = [
   ['company_name', COMPANY, 'general', 'Company name', 'text', 1],
   ['company_name_accent', 'Goa', 'general', 'Brand word shown in accent colour', 'text', 2],
   ['logo_url', '', 'general', 'Logo', 'image', 3],
-  ['favicon_url', '', 'general', 'Favicon', 'image', 4],
+  ['favicon_url', '/images/favicon-08773094.svg', 'general', 'Favicon', 'image', 4],
   ['tagline', 'Your Trusted Repair & Ac Service Experts', 'general', 'Tagline', 'text', 5],
 
   ['phone', PHONE, 'contact', 'Phone number', 'tel', 1],

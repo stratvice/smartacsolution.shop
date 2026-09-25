@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Spanner">
+  <!-- A spanner reads as "repair" at 16px where a snowflake or a whole AC unit
+       turns to mush. Navy tile, brand orange mark. -->
+  <rect width="64" height="64" rx="14" fill="#0B2239"/>
+  <g transform="rotate(-45 32 32)" fill="#FF7A00">
+    <!-- handle -->
+    <rect x="28.5" y="25" width="7" height="25" rx="3.5"/>
+    <!-- open-ended head: a ring with its top bitten out -->
+    <path d="M32 10a11 11 0 1 0 0.01 0z"/>
+  </g>
+  <g transform="rotate(-45 32 32)" fill="#0B2239">
+    <circle cx="32" cy="21" r="5.5"/>
+    <rect x="27.5" y="7" width="9" height="9"/>
+  </g>
+</svg>

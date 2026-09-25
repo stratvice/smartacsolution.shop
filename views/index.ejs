@@ -41,7 +41,10 @@
   <% if (S.seo_og_image) { %><meta property="og:image" content="<%= S.seo_og_image %>"/><% } %>
   <meta property="og:url" content="<%= canonical %>"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <% if (S.favicon_url) { %><link rel="icon" href="<%= S.favicon_url %>"/><% } %>
+  <% if (S.favicon_url) { %><link rel="icon" href="<%= S.favicon_url %>"<%= /.svg$/i.test(S.favicon_url) ? ' type="image/svg+xml"' : '' %>/>
+  <link rel="apple-touch-icon" href="<%= S.favicon_url %>"/><% } %>
+  <%# Older browsers and crawlers ask for this by name whatever the tags say. %>
+  <link rel="icon" href="/favicon.ico" sizes="32x32"/>
   <% if (S.google_site_verification) { %><meta name="google-site-verification" content="<%= S.google_site_verification %>"/><% } %>
 
   <%
