@@ -55,6 +55,8 @@ const SETTINGS = {
   nav_cta_link: 'tel:' + PHONE_RAW,
   sticky_cta_text: 'Call Now: ' + PHONE,
   sticky_cta_link: 'tel:' + PHONE_RAW,
+  secondary_cta_text: 'Chat Now',
+  secondary_cta_link: 'https://wa.link/pbjr74',
   seo_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_title: COMPANY + ' | Home Appliance Repair Experts',
   seo_og_image: IMG.hero,
@@ -70,7 +72,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-call-icon';
+const REVISION = '2026-09-25-chat-now';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
@@ -133,6 +135,9 @@ async function main() {
     hero.imageAlt = COMPANY;
     hero.primaryBtnLink = '#contact';
     hero.primaryBtnIcon = '';
+    hero.secondaryBtnText = 'Chat Now';
+    hero.secondaryBtnLink = 'https://wa.link/pbjr74';
+    hero.secondaryBtnIcon = 'fab fa-whatsapp';
     hero.stats = [
       { value: 9000, label: 'Jobs Done', accent: false },
       { value: 8500, label: 'Happy Customers', accent: true },

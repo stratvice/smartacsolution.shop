@@ -60,8 +60,8 @@ const SETTINGS = [
 
   ['primary_cta_text', 'Book Now', 'cta', 'Primary CTA text', 'text', 1],
   ['primary_cta_link', '#contact', 'cta', 'Primary CTA link', 'text', 2],
-  ['secondary_cta_text', 'Our Services', 'cta', 'Secondary CTA text', 'text', 3],
-  ['secondary_cta_link', '#services', 'cta', 'Secondary CTA link', 'text', 4],
+  ['secondary_cta_text', 'Chat Now', 'cta', 'Secondary CTA text', 'text', 3],
+  ['secondary_cta_link', 'https://wa.link/pbjr74', 'cta', 'Secondary CTA link', 'text', 4],
   ['nav_cta_text', 'Call Now', 'cta', 'Navbar CTA text', 'text', 5],
   ['nav_cta_link', 'tel:' + PHONE_RAW, 'cta', 'Navbar CTA link', 'text', 6],
   ['sticky_cta_text', 'Call Now: ' + PHONE, 'cta', 'Sticky bottom bar text', 'text', 7],
@@ -147,9 +147,9 @@ const SECTIONS = [
       primaryBtnText: 'Book Now',
       primaryBtnLink: '#contact',
       primaryBtnIcon: '',
-      secondaryBtnText: 'Our Services',
-      secondaryBtnLink: '#services',
-      secondaryBtnIcon: 'fa fa-tools',
+      secondaryBtnText: 'Chat Now',
+      secondaryBtnLink: 'https://wa.link/pbjr74',
+      secondaryBtnIcon: 'fab fa-whatsapp',
       stats: [
         { value: 9000, label: 'Jobs Done', accent: false },
         { value: 8500, label: 'Happy Customers', accent: true },

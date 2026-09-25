@@ -195,7 +195,9 @@
           <%# Icons are optional: an empty icon field renders no <i> at all,
               rather than silently falling back to a default one. %>
           <% if (hero.primaryBtnText) { %><a href="<%= hero.primaryBtnLink || '#contact' %>" class="btn btn-orange"><% if (hero.primaryBtnIcon) { %><i class="<%= hero.primaryBtnIcon %> me-2"></i><% } %><%= hero.primaryBtnText %></a><% } %>
-          <% if (hero.secondaryBtnText) { %><a href="<%= hero.secondaryBtnLink || '#services' %>" class="btn btn-outline-teal"><% if (hero.secondaryBtnIcon) { %><i class="<%= hero.secondaryBtnIcon %> me-2"></i><% } %><%= hero.secondaryBtnText %></a><% } %>
+          <%# An external destination (WhatsApp, say) opens in a new tab so the
+              visitor does not lose the page; an in-page anchor must not. %>
+          <% if (hero.secondaryBtnText) { var secLink = hero.secondaryBtnLink || '#services'; var secExternal = /^https?:\/\//i.test(secLink); %><a href="<%= secLink %>" class="btn btn-outline-teal"<%- secExternal ? ' target="_blank" rel="noopener"' : '' %>><% if (hero.secondaryBtnIcon) { %><i class="<%= hero.secondaryBtnIcon %> me-2"></i><% } %><%= hero.secondaryBtnText %></a><% } %>
         </div>
         <div class="row g-2 mt-2">
           <% (hero.stats || []).forEach(function (st) { %>
