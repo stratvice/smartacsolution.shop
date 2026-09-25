@@ -313,6 +313,7 @@ router.get(
         // Booleans and a message only — the API key never reaches a template.
         transportReady: mailer.isConfigured(),
         transportProblem: mailer.configProblem(),
+        transport: mailer.describeTransport(),
         enabledKey: notifier.ENABLED_KEY,
         recipientsKey: notifier.RECIPIENTS_KEY,
         maxRecipients: notifier.MAX_RECIPIENTS,

@@ -1,4 +1,5 @@
 'use strict';
+const fs = require('fs');
 require('./load-env');
 const path = require('path');
 
@@ -15,6 +16,38 @@ function list(v) {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+/** Is there a mail program at this path that we are allowed to run? */
+function hasSendmail(path) {
+  if (!path) return false;
+  try {
+    fs.accessSync(path, fs.constants.X_OK);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+/** Do two addresses (either may carry a display name) share a domain? */
+function sameDomain(a, b) {
+  const domain = (value) => {
+    const match = String(value || '').match(/@([^s>]+)/);
+    return match ? match[1].toLowerCase() : '';
+  };
+  const left = domain(a);
+  return Boolean(left) && left === domain(b);
+}
+
+/** noreply@<the site's own domain>, for transports with no account behind them. */
+function defaultFromAddress(appUrl) {
+  try {
+    const host = new URL(appUrl).hostname.replace(/^www./, '');
+    if (!host || host === 'localhost') return '';
+    return 'noreply@' + host;
+  } catch (err) {
+    return '';
+  }
 }
 
 const env = {
@@ -59,11 +92,20 @@ const env = {
   // template, an API response or the browser.
   //
   // EMAIL_DRIVER picks the transport:
-  //   resend - Resend HTTP API. Needs a domain verified with Resend.
-  //   smtp   - any SMTP server, Gmail included. Needs no domain verification,
-  //            which is why it is the quickest way to start sending.
+  //   resend   - Resend HTTP API. Needs a domain verified with Resend.
+  //   smtp     - any SMTP server, Gmail included. Needs no domain
+  //              verification, which is why it is the quickest way to start.
+  //   sendmail - hand the message to the host's own mail program. No
+  //              credential at all, but it only exists on hosts that provide
+  //              one, and mail sent this way is more likely to be filtered
+  //              because it is not signed.
+  //
+  // Left unset, the driver is chosen from what is actually available rather
+  // than defaulting to a provider that has not been configured: a site with no
+  // mail credentials still sends through the host if there is one to use. An
+  // explicit EMAIL_DRIVER always wins.
   email: {
-    driver: (process.env.EMAIL_DRIVER || 'resend').toLowerCase(),
+    driver: (process.env.EMAIL_DRIVER || '').toLowerCase(),
     smtp: {
       // Gmail defaults, so that case needs only SMTP_USER, SMTP_PASS, EMAIL_FROM.
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -75,6 +117,9 @@ const env = {
     },
     resendApiKey: process.env.RESEND_API_KEY || '',
     from: process.env.EMAIL_FROM || '',
+    // Where the host's mail program lives. Standard on Linux; overridable for
+    // hosts that put it elsewhere.
+    sendmailPath: process.env.SENDMAIL_PATH || '/usr/sbin/sendmail',
     replyTo: process.env.EMAIL_REPLY_TO || '',
     apiUrl: process.env.RESEND_API_URL || 'https://api.resend.com/emails',
     timeoutMs: int(process.env.EMAIL_TIMEOUT_MS, 10000),
@@ -106,19 +151,63 @@ if (missing.length) {
   console.error('[config] Copy .env.example to .env and fill it in.\n');
   process.exit(1);
 }
+// Settle on one transport now, so nothing downstream has to guess: take
+// whatever is actually usable, in order of how well it delivers.
+function usableDriver(name) {
+  if (name === 'smtp') return Boolean(env.email.smtp.user && env.email.smtp.pass);
+  if (name === 'resend') return Boolean(env.email.resendApiKey);
+  if (name === 'sendmail') return hasSendmail(env.email.sendmailPath);
+  return false;
+}
+
+const chosen = env.email.driver;
+if (!chosen) {
+  env.email.driver =
+    ['smtp', 'resend', 'sendmail'].find(usableDriver) || 'resend'; // nothing available; report against this
+} else if (!usableDriver(chosen) && usableDriver('sendmail')) {
+  // A driver was named but its credentials were never filled in, which is the
+  // usual state of a config copied from the example. Silently sending nothing
+  // is the worst outcome, so use the host's mail program and say so.
+  env.email.driver = 'sendmail';
+  console.warn(
+    '[config] EMAIL_DRIVER=' +
+      chosen +
+      ' has no credentials, so lead notifications will go through the host mail program instead. ' +
+      'Fill in the credentials to use ' +
+      chosen +
+      '.'
+  );
+}
+
+// The host's mail program has no account behind it, so the only address it is
+// entitled to send as is one at the site's own domain. Anything else -- a
+// leftover placeholder, or a Gmail address meant for the SMTP driver -- fails
+// SPF at the receiving end and is rejected or filed as spam. Replace it rather
+// than send something that will not arrive.
+if (env.email.driver === 'sendmail') {
+  const ours = defaultFromAddress(env.appUrl);
+  if (ours && !sameDomain(env.email.from, ours)) env.email.from = ours;
+}
+
 // Email is optional: the site and lead capture work fully without it, so this
 // is a warning rather than a boot failure.
-const emailReady =
-  env.email.driver === 'smtp'
-    ? Boolean(env.email.smtp.user && env.email.smtp.pass && env.email.from)
-    : Boolean(env.email.resendApiKey && env.email.from);
-if (!emailReady) {
-  const missing =
-    env.email.driver === 'smtp' ? 'SMTP_USER, SMTP_PASS and EMAIL_FROM' : 'RESEND_API_KEY and EMAIL_FROM';
+const EMAIL_REQUIREMENTS = {
+  smtp: { ok: () => env.email.smtp.user && env.email.smtp.pass && env.email.from, missing: 'SMTP_USER, SMTP_PASS and EMAIL_FROM' },
+  resend: { ok: () => env.email.resendApiKey && env.email.from, missing: 'RESEND_API_KEY and EMAIL_FROM' },
+  sendmail: { ok: () => env.email.from && hasSendmail(env.email.sendmailPath), missing: 'a mail program at ' + env.email.sendmailPath },
+};
+const requirement = EMAIL_REQUIREMENTS[env.email.driver] || EMAIL_REQUIREMENTS.resend;
+if (!requirement.ok()) {
   console.warn(
     '[config] Lead email notifications are inactive — set ' +
-      missing +
+      requirement.missing +
       ' to enable them. Leads are still saved normally.'
+  );
+} else if (env.email.driver === 'sendmail') {
+  console.warn(
+    '[config] Sending lead notifications through the host mail program as ' +
+      env.email.from +
+      '. Unsigned mail is filtered more often, so check the spam folder if one does not arrive.'
   );
 }
 // Local storage is only lossy when the upload directory sits inside the

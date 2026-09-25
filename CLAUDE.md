@@ -108,11 +108,21 @@ params on `req.validatedQuery` rather than back on `req.query`. Throw
 in `asyncHandler` so rejections reach the error middleware, which logs 5xx and
 returns a generic message.
 
-**Email.** Lead notifications go through Resend (`lib/mailer.js` →
-`services/leadNotifier.js`). The recipient list and on/off switch are
-`site_settings` rows (`lead_email_recipients`, `lead_email_enabled`) editable
-from the admin panel; only the API key is env. Optional — the app boots and
-captures leads with it unconfigured.
+**Email.** Lead notifications go through `lib/mailer.js` →
+`services/leadNotifier.js`. Three transports: `smtp` (Gmail and anything
+else), `resend` (HTTP API, no ports to be blocked) and `sendmail` (the host's
+own mail program, no credential at all but unsigned and easily filtered).
+
+`EMAIL_DRIVER` forces one. Left unset, `config/env.js` resolves it from what
+is usable — SMTP credentials, then a Resend key, then a mail program at
+`SENDMAIL_PATH` — so a server with no mail config still sends if the host
+provides a way. Under `sendmail` the from-address is forced to the site's own
+domain: there is no account behind it, and any other domain fails SPF.
+
+The recipient list and on/off switch are `site_settings` rows
+(`lead_email_recipients`, `lead_email_enabled`) editable from the admin panel;
+only credentials are env. Optional — the app boots and captures leads with it
+unconfigured, and `mailer.describeTransport()` is what the settings page shows.
 
 **Uploads.** `lib/storage.js` switches on `STORAGE_DRIVER` (`local` |
 `cloudinary`). Only the URL and metadata are stored in `media`, never the

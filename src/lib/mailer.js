@@ -20,8 +20,13 @@ function usingSmtp() {
   return env.email.driver === 'smtp';
 }
 
+function usingSendmail() {
+  return env.email.driver === 'sendmail';
+}
+
 /** True when the server has everything it needs to actually send. */
 function isConfigured() {
+  if (usingSendmail()) return Boolean(env.email.from);
   if (usingSmtp()) return Boolean(env.email.smtp.user && env.email.smtp.pass && env.email.from);
   return Boolean(env.email.resendApiKey && env.email.from);
 }
@@ -31,6 +36,10 @@ function isConfigured() {
  * Returns null when the transport is ready.
  */
 function configProblem() {
+  if (usingSendmail()) {
+    if (!env.email.from) return 'Email service is not configured on the server (EMAIL_FROM is not set).';
+    return null;
+  }
   if (usingSmtp()) {
     if (!env.email.smtp.user) return 'Email service is not configured on the server (SMTP_USER is not set).';
     if (!env.email.smtp.pass) return 'Email service is not configured on the server (SMTP_PASS is not set).';
@@ -40,6 +49,28 @@ function configProblem() {
   if (!env.email.resendApiKey) return 'Email service is not configured on the server (RESEND_API_KEY is not set).';
   if (!env.email.from) return 'Email service is not configured on the server (EMAIL_FROM is not set).';
   return null;
+}
+
+/**
+ * What is actually sending, for the admin panel. Names and an address only —
+ * no key, no password, nothing that would be a leak if it reached a template.
+ */
+function describeTransport() {
+  if (!isConfigured()) return null;
+  if (usingSendmail()) {
+    return {
+      driver: 'sendmail',
+      label: "this server's own mail program",
+      from: env.email.from,
+      caveat:
+        'Mail sent this way is unsigned, so it is filtered more often than mail from a real mailbox. ' +
+        'If a notification does not arrive, check the spam folder, then switch to Gmail or Resend.',
+    };
+  }
+  if (usingSmtp()) {
+    return { driver: 'smtp', label: env.email.smtp.host, from: env.email.from, caveat: '' };
+  }
+  return { driver: 'resend', label: 'Resend', from: env.email.from, caveat: '' };
 }
 
 /**
@@ -71,6 +102,18 @@ let transporter = null;
 function getTransporter() {
   if (transporter) return transporter;
   const nodemailer = require('nodemailer');
+
+  if (usingSendmail()) {
+    // No host, no port, no credential: the message is piped to the program the
+    // server already runs for mail. newline:'unix' is what sendmail expects.
+    transporter = nodemailer.createTransport({
+      sendmail: true,
+      newline: 'unix',
+      path: env.email.sendmailPath,
+    });
+    return transporter;
+  }
+
   transporter = nodemailer.createTransport({
     host: env.email.smtp.host,
     port: env.email.smtp.port,
@@ -83,7 +126,8 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendViaSmtp({ recipients, subject, html, text, replyTo }) {
+/** Shared by the SMTP and sendmail drivers: both go through nodemailer. */
+async function sendViaNodemailer({ recipients, subject, html, text, replyTo }) {
   try {
     const info = await getTransporter().sendMail({
       from: env.email.from,
@@ -102,7 +146,8 @@ async function sendViaSmtp({ recipients, subject, html, text, replyTo }) {
       err && err.responseCode === 535
         ? ' Gmail needs an App Password (with 2-Step Verification on), not your normal account password.'
         : '';
-    return { ok: false, error: 'SMTP send failed (' + code + sanitise(err && err.message) + ').' + hint };
+    const what = usingSendmail() ? 'Host mail program failed' : 'SMTP send failed';
+    return { ok: false, error: what + ' (' + code + sanitise(err && err.message) + ').' + hint };
   }
 }
 
@@ -110,6 +155,7 @@ async function sendViaSmtp({ recipients, subject, html, text, replyTo }) {
 async function verify() {
   const problem = configProblem();
   if (problem) return { ok: false, error: problem };
+  if (usingSendmail()) return { ok: true, note: 'The host mail program is only verified by sending; nothing to check up front.' };
   if (!usingSmtp()) return { ok: true, note: 'Resend is verified by sending; nothing to check up front.' };
   try {
     await getTransporter().verify();
@@ -126,7 +172,7 @@ async function send({ to, subject, html, text, replyTo }) {
   const problem = configProblem();
   if (problem) return { ok: false, error: problem };
 
-  if (usingSmtp()) return sendViaSmtp({ recipients, subject, html, text, replyTo });
+  if (usingSmtp() || usingSendmail()) return sendViaNodemailer({ recipients, subject, html, text, replyTo });
 
   const payload = {
     from: env.email.from,
@@ -167,4 +213,4 @@ async function send({ to, subject, html, text, replyTo }) {
   }
 }
 
-module.exports = { send, verify, isConfigured, configProblem, sanitise, usingSmtp };
+module.exports = { send, verify, isConfigured, configProblem, sanitise, usingSmtp, describeTransport };

@@ -91,6 +91,14 @@
           <div class="hint" style="margin-top:3px;"><%= notify.transportProblem %> Recipients can still be saved now; notifications start sending once the server is configured. Leads are always saved regardless.</div>
         </div>
       </div>
+      <% } else if (notify.transport) { %>
+      <div class="notice-warn" style="margin-bottom:16px;border-color:rgba(6,118,71,.3);background:rgba(6,118,71,.06);">
+        <i class="fa fa-circle-check" style="color:#067647;"></i>
+        <div>
+          <strong>Sending through <%= notify.transport.label %>.</strong>
+          <div class="hint" style="margin-top:3px;">From <%= notify.transport.from %>.<% if (notify.transport.caveat) { %> <%= notify.transport.caveat %><% } %></div>
+        </div>
+      </div>
       <% } %>
 
       <div class="field">
