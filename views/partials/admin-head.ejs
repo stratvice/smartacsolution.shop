@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow"/>
-  <title><%= title %> · Admin</title>
+  <title><%= title %> · <%= company %></title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="icon" href="/images/favicon-08773094.svg" type="image/svg+xml"/>
@@ -17,7 +17,18 @@
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div>
-        <strong>24x7 <em>Support</em></strong>
+        <%
+          // Split the brand the same way the public header does: the accent
+          // word is emphasised, everything before it is plain.
+          // Guarded: a missing local would otherwise throw and take the whole
+          // admin page down over a styling detail.
+          const accentWord = (typeof companyAccent === 'string' && companyAccent) || '';
+          const brandMain =
+            accentWord && company.endsWith(accentWord)
+              ? company.slice(0, -accentWord.length).trim()
+              : company;
+        %>
+        <strong><%= brandMain %><% if (accentWord) { %> <em><%= accentWord %></em><% } %></strong>
         <small>Admin Panel</small>
       </div>
     </div>

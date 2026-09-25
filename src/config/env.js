@@ -136,7 +136,7 @@ const env = {
   },
 
   seedAdmin: {
-    email: process.env.SEED_ADMIN_EMAIL || 'admin@24x7support.local',
+    email: process.env.SEED_ADMIN_EMAIL || 'admin@smartacsolution.shop',
     username: process.env.SEED_ADMIN_USERNAME || 'admin',
     password: process.env.SEED_ADMIN_PASSWORD || '',
   },

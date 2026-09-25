@@ -27,8 +27,10 @@ router.use(async (_req, res, next) => {
   try {
     const { map } = await getSettings();
     res.locals.company = map.company_name || 'Smart ac solution Goa';
+    res.locals.companyAccent = map.company_name_accent || '';
   } catch {
     res.locals.company = 'Smart ac solution Goa';
+    res.locals.companyAccent = '';
   }
   next();
 });
