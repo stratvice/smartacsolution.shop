@@ -51,6 +51,13 @@ function configProblem() {
   return null;
 }
 
+/** "Company Name <address>", unless EMAIL_FROM already carries a name. */
+function fromHeader(name) {
+  const configured = env.email.from || '';
+  if (!name || configured.includes('<')) return configured;
+  return '"' + String(name).replace(/["\\]/g, '') + '" <' + configured + '>';
+}
+
 /**
  * What is actually sending, for the admin panel. Names and an address only —
  * no key, no password, nothing that would be a leak if it reached a template.
@@ -127,10 +134,10 @@ function getTransporter() {
 }
 
 /** Shared by the SMTP and sendmail drivers: both go through nodemailer. */
-async function sendViaNodemailer({ recipients, subject, html, text, replyTo }) {
+async function sendViaNodemailer({ recipients, subject, html, text, replyTo, fromName }) {
   try {
     const info = await getTransporter().sendMail({
-      from: env.email.from,
+      from: fromHeader(fromName),
       to: recipients.join(', '),
       subject,
       html,
@@ -165,17 +172,17 @@ async function verify() {
   }
 }
 
-async function send({ to, subject, html, text, replyTo }) {
+async function send({ to, subject, html, text, replyTo, fromName }) {
   const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean);
   if (!recipients.length) return { ok: false, error: 'No recipients configured.' };
 
   const problem = configProblem();
   if (problem) return { ok: false, error: problem };
 
-  if (usingSmtp() || usingSendmail()) return sendViaNodemailer({ recipients, subject, html, text, replyTo });
+  if (usingSmtp() || usingSendmail()) return sendViaNodemailer({ recipients, subject, html, text, replyTo, fromName });
 
   const payload = {
-    from: env.email.from,
+    from: fromHeader(fromName),
     to: recipients,
     subject,
     html,

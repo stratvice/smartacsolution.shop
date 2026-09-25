@@ -167,6 +167,7 @@ async function notifyNewLead(lead) {
       subject,
       html,
       text,
+      fromName: config.companyName,
       // Replying to the notification reaches the customer when they left an address.
       replyTo: lead.email || undefined,
     });
@@ -256,7 +257,7 @@ async function sendTestEmail(triggeredBy) {
     `[notify] test email requested by ${triggeredBy || 'admin'} → ${config.recipients.length} recipient(s): ${config.recipients.join(', ')}`
   );
 
-  const result = await mailer.send({ to: config.recipients, subject, html, text });
+  const result = await mailer.send({ to: config.recipients, subject, html, text, fromName: config.companyName });
 
   if (result.ok) {
     console.log(`[notify] test email sent successfully (provider id ${result.id || 'n/a'}).`);
