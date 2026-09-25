@@ -6,7 +6,7 @@
  * reliably in Gmail, Outlook and Apple Mail. Colours match the site palette.
  * A plain-text alternative is generated alongside for text-only clients.
  */
-const { telLink, waLink, phoneDigits } = require('./format');
+const { telLink, waLink, phoneDigits, mapsLink } = require('./format');
 
 const NAVY = '#0e2a47';
 const ORANGE = '#f7941d';
@@ -72,6 +72,13 @@ function leadEmail(lead, opts = {}) {
   const waText = `Hello ${lead.name || ''}, thank you for contacting ${company}.`;
   const callHref = telLink(lead.phone);
   const waHref = waLink(lead.phone, waText);
+  const map = mapsLink(lead);
+  const mapHtml = map
+    ? `<a href="${esc(map.href)}" style="color:${NAVY};text-decoration:none;font-weight:bold;">Open in Google Maps</a>` +
+      (map.precise
+        ? ''
+        : `<span style="color:${MUTED};font-weight:normal;"> (approximate, from the area given)</span>`)
+    : '';
 
   const phoneHtml = digits
     ? `<a href="${esc(callHref)}" style="color:${NAVY};text-decoration:none;font-weight:bold;">${esc(lead.phone)}</a>`
@@ -147,6 +154,7 @@ function leadEmail(lead, opts = {}) {
                 ${row('Service', lead.service)}
                 ${row('Message', null, { html: messageHtml })}
                 ${row('Location', location)}
+                ${row('Location link', null, { html: mapHtml })}
                 ${row('Source', lead.source)}
                 ${row('Date & Time', created)}
                 ${row('UTM Source', lead.utmSource)}
@@ -180,6 +188,7 @@ function leadEmail(lead, opts = {}) {
     `Service:       ${dash(lead.service)}`,
     `Message:       ${dash(lead.message)}`,
     `Location:      ${location}`,
+    `Location link: ${map ? map.href : '—'}`,
     `Source:        ${dash(lead.source)}`,
     `Date & Time:   ${created}`,
     `UTM Source:    ${dash(lead.utmSource)}`,

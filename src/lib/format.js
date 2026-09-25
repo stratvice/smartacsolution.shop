@@ -18,6 +18,35 @@ function waLink(phone, text) {
 }
 
 /**
+ * A map link for a lead.
+ *
+ * Coordinates give an exact pin, which only exists when the visitor granted
+ * location or pressed Detect. Without them, search for whatever place name
+ * was captured instead: less precise, but still worth a tap when someone is
+ * deciding whether a job is nearby. Null when there is nothing to point at.
+ *
+ * `precise` lets the caller say which of the two it is, so an approximate
+ * link is never passed off as the customer's doorstep.
+ */
+function mapsLink(lead) {
+  const lat = Number(lead && lead.latitude);
+  const lon = Number(lead && lead.longitude);
+  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+    return { href: `https://www.google.com/maps?q=${lat},${lon}`, precise: true };
+  }
+
+  const place = [lead && lead.city, lead && lead.state, lead && lead.country]
+    .filter(Boolean)
+    .join(', ');
+  if (!place) return null;
+
+  return {
+    href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place),
+    precise: false,
+  };
+}
+
+/**
  * Interpolate {{city}} / {{state}} / {{country}} tokens so admins can write
  * location-aware copy such as "AC Repair Services in {{city}}".
  * Unknown location falls back to the configured default city.
@@ -63,4 +92,4 @@ function slugify(s) {
     .slice(0, 60) || `item-${Date.now()}`;
 }
 
-module.exports = { telLink, waLink, phoneDigits, personalise, starIcons, initial, slugify };
+module.exports = { telLink, waLink, phoneDigits, mapsLink, personalise, starIcons, initial, slugify };

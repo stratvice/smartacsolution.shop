@@ -199,6 +199,31 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function mapsLink(lead) {
+    var lat = Number(lead.latitude);
+    var lon = Number(lead.longitude);
+    if (isFinite(lat) && isFinite(lon) && lead.latitude != null && lead.longitude != null) {
+      return { href: 'https://www.google.com/maps?q=' + lat + ',' + lon, precise: true };
+    }
+    var place = [lead.city, lead.state, lead.country].filter(Boolean).join(', ');
+    if (!place) return null;
+    return {
+      href: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place),
+      precise: false,
+    };
+  }
+
+  /** The map row for the lead drawer: an exact pin, or a search, or nothing. */
+  function mapCell(lead) {
+    var map = mapsLink(lead);
+    if (!map) return '—';
+    return (
+      '<a href="' + esc(map.href) + '" target="_blank" rel="noopener noreferrer">' +
+      '<i class="fa fa-location-dot" style="margin-right:6px;"></i>Open in Google Maps</a>' +
+      (map.precise ? '' : ' <span class="hint">(approximate, from the area given)</span>')
+    );
+  }
+
   function fmtDate(d) {
     return d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
   }
@@ -267,6 +292,7 @@
         '<dt>Country</dt><dd>' + esc(lead.country || '—') + '</dd>' +
         '<dt>Coordinates</dt><dd>' + (lead.latitude != null ? esc(lead.latitude + ', ' + lead.longitude) : '—') + '</dd>' +
         '<dt>Location via</dt><dd>' + esc(lead.locationSrc || '—') + '</dd>' +
+        '<dt>Map</dt><dd>' + mapCell(lead) + '</dd>' +
         '<dt>Source</dt><dd>' + esc(lead.source || '—') + '</dd>' +
         '<dt>UTM source</dt><dd>' + esc(lead.utmSource || '—') + '</dd>' +
         '<dt>UTM medium</dt><dd>' + esc(lead.utmMedium || '—') + '</dd>' +
