@@ -106,6 +106,44 @@
   }
 
   /**
+   * Claim a tab while the submit click still counts as user activation.
+   *
+   * The hand-off happens after the server responds, and by then the click has
+   * expired: window.open() at that point is a pop-up and browsers block it
+   * silently. Opening here and navigating it later is the way to land in a
+   * new tab rather than replacing the page.
+   */
+  function claimTab() {
+    var tab = null;
+    try {
+      tab = window.open('', '_blank');
+    } catch (err) {
+      return null; // blocked outright
+    }
+    if (!tab) return null;
+    try {
+      tab.document.write(
+        '<!doctype html><meta charset="utf-8"><title>Opening WhatsApp</title>' +
+          '<body style="margin:0;display:grid;place-items:center;height:100vh;' +
+          'font:600 16px/1.5 system-ui,sans-serif;color:#0b2239;background:#f9fbfd">' +
+          'Opening WhatsApp&hellip;</body>'
+      );
+      tab.document.close();
+    } catch (err) {
+      /* about:blank is fine to leave empty */
+    }
+    return tab;
+  }
+
+  function releaseTab(tab) {
+    try {
+      if (tab && !tab.closed) tab.close();
+    } catch (err) {
+      /* nothing to do */
+    }
+  }
+
+  /**
    * Hand the enquiry to WhatsApp once it is safely saved.
    *
    * This opens the visitor's own WhatsApp with the message written out and
@@ -114,14 +152,17 @@
    * the notification -- it is a shortcut, and the lead is already in the
    * database either way.
    */
-  function handOffToWhatsApp(data) {
+  function handOffToWhatsApp(data, tab) {
     var number = (form.getAttribute('data-wa-number') || '').replace(/\D/g, '');
-    if (!number) return;
+    if (!number) {
+      releaseTab(tab);
+      return;
+    }
 
     var url = 'https://wa.me/' + number + '?text=' + encodeURIComponent(whatsappText(data));
 
-    // Offer the link as well as opening it: a pop-up blocker can stop the
-    // call below, and the visitor may want it on a different device.
+    // Offer the link as well: the tab above can still have been blocked, and
+    // the visitor may want the message on a different device.
     if (msgBox) {
       var link = document.createElement('a');
       link.href = url;
@@ -134,7 +175,13 @@
     }
 
     setTimeout(function () {
-      window.location.href = url;
+      if (tab && !tab.closed) {
+        tab.location.href = url;
+        return;
+      }
+      // No tab to use. Try once more in case the browser is lenient; if that
+      // is refused too, the link in the success message is the way through.
+      window.open(url, '_blank');
     }, 1500);
   }
 
@@ -177,6 +224,7 @@
     }
 
     submitting = true;
+    var waTab = claimTab();
     if (button) {
       button.disabled = true;
       button.innerHTML = '<i class="fa fa-circle-notch fa-spin me-2"></i>Sending…';
@@ -201,7 +249,7 @@
             result.body.message || "Thank you! We've received your request and will call you back shortly.",
             'success'
           );
-          handOffToWhatsApp(data);
+          handOffToWhatsApp(data, waTab);
           if (button) {
             button.innerHTML = '<i class="fa fa-check me-2"></i>Message Sent!';
             button.style.background = '#25D366';
@@ -212,6 +260,8 @@
           }
           return;
         }
+
+        releaseTab(waTab);
 
         // Field-level errors from the server land on the right inputs.
         var handled = false;
@@ -230,6 +280,7 @@
         );
       })
       .catch(function () {
+        releaseTab(waTab);
         setMessage('Network error. Please check your connection or call us directly.', 'error');
       })
       .finally(function () {
