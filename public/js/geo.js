@@ -83,6 +83,11 @@
         .replace(/\{\{\s*state\s*\}\}/gi, location.state || '')
         .replace(/\{\{\s*country\s*\}\}/gi, location.country || '');
 
+      // A token this script cannot resolve is a mistake in the template, and
+      // writing it out puts something like "{{highlight}}" on the page where a
+      // heading should be. Leave what the server rendered alone instead.
+      if (text.indexOf('{{') !== -1) return;
+
       // Keep any leading icon; replace only the text node after it.
       var icon = el.querySelector('i');
       el.textContent = ' ' + text.trim();

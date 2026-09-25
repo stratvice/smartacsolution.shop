@@ -60,6 +60,10 @@ function personalise(text, location, defaults = {}) {
     .replace(/\{\{\s*city\s*\}\}/gi, city)
     .replace(/\{\{\s*state\s*\}\}/gi, state)
     .replace(/\{\{\s*country\s*\}\}/gi, country)
+    // Anything still in braces is a typo or a token that was never supported.
+    // Printing it puts "{{highlight}}" in a heading on a live page, which is
+    // worse than dropping it, so drop it.
+    .replace(/\{\{[^}]*\}\}/g, '')
     // Tidy the leftovers when nothing resolved, e.g. "Services in " -> "Services".
     .replace(/\s+in\s*$/i, '')
     .replace(/\s{2,}/g, ' ')
