@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const env = require('./config/env');
 const prisma = require('./lib/prisma');
 const { HttpError } = require('./lib/http');
+const assetVersion = require('./lib/asset-version');
 const { loadAdmin, requireAdminApi } = require('./middleware/auth');
 const { adminApiLimiter } = require('./middleware/rateLimit');
 
@@ -103,6 +104,9 @@ app.use(loadAdmin);
 app.use((req, res, next) => {
   res.locals.admin = req.admin;
   res.locals.currentPath = req.path;
+  // Templates reference stylesheets and scripts through this so a deploy
+  // cannot leave a returning visitor on a cached copy. See lib/asset-version.
+  res.locals.asset = assetVersion.asset;
   next();
 });
 
