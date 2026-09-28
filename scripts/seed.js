@@ -142,7 +142,7 @@ const SECTIONS = [
     label: 'Hero',
     order: 2,
     content: {
-      badge: '#1 Appliance Repair in {{city}}',
+      badge: '#1 Appliance Repair in {{place}}',
       badgeIcon: 'fa fa-star',
       heading: 'Your Trusted',
       highlight1: 'Repair',

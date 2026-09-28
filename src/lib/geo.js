@@ -29,9 +29,13 @@ function cacheSet(key, value) {
   cache.set(key, { at: Date.now(), value });
 }
 
-function normalise(city, state, country, source, lat, lon) {
-  if (!city && !state && !country) return null;
+function normalise(area, city, state, country, source, lat, lon) {
+  if (!area && !city && !state && !country) return null;
   return {
+    // The neighbourhood or locality, when the geocoder knows one. "Delhi" is
+    // too broad to mean anything to someone booking a repair; "Saket, Delhi"
+    // is where they live.
+    area: area && area !== city ? area : null,
     city: city || null,
     state: state || null,
     country: country || null,
@@ -51,7 +55,9 @@ async function reverseGeocode(lat, lon) {
   if (cached !== undefined) return cached;
 
   try {
-    const url = `${env.geo.nominatimUrl}?format=jsonv2&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
+    // zoom=10 answers at city level and never returns a suburb. 16 is the
+    // neighbourhood, which is the granularity people recognise.
+    const url = `${env.geo.nominatimUrl}?format=jsonv2&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`;
     const res = await fetchWithTimeout(
       url,
       { headers: { 'User-Agent': env.geo.nominatimUserAgent, Accept: 'application/json' } },
@@ -60,9 +66,15 @@ async function reverseGeocode(lat, lon) {
     if (!res.ok) throw new Error(`nominatim ${res.status}`);
     const data = await res.json();
     const a = data.address || {};
+    // Broadest first for the city, because a village or town IS the specific
+    // name where there is no larger one: inland Goa returns village "Bandoli"
+    // and no city at all.
     const city =
       a.city || a.town || a.village || a.municipality || a.county || a.state_district || null;
-    const value = normalise(city, a.state || null, a.country || null, 'gps', lat, lon);
+    // Finest first for the area, and only the genuinely local fields: a
+    // city_district like "South" is no more use than the city itself.
+    const area = a.suburb || a.neighbourhood || a.quarter || a.hamlet || null;
+    const value = normalise(area, city, a.state || null, a.country || null, 'gps', lat, lon);
     cacheSet(key, value);
     return value;
   } catch (err) {
@@ -107,6 +119,7 @@ async function lookupByIp(ip) {
     const data = await res.json();
     if (data && data.success === false) throw new Error(data.message || 'ip lookup failed');
     const value = normalise(
+      null, // an IP is never accurate enough to name a neighbourhood
       data.city,
       data.region,
       data.country,

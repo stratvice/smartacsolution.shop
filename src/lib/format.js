@@ -60,10 +60,23 @@ function mapsLink(lead) {
  */
 function personalise(text, location, defaults = {}) {
   if (!text || typeof text !== 'string') return text || '';
+  const area = (location && location.area) || '';
   const city = (location && location.city) || defaults.city || '';
   const state = (location && location.state) || defaults.state || '';
   const country = (location && location.country) || defaults.country || 'India';
+
+  // "Saket, Delhi" rather than "Delhi", because a city that size tells a
+  // customer nothing about whether anyone will actually come to them. Falls
+  // back to the city alone when no neighbourhood is known, which is the case
+  // for a visitor who has not granted location, and for a village that is
+  // already as specific as it gets.
+  const place = [area, city].filter(Boolean).filter(function (part, i, all) {
+    return all.indexOf(part) === i;
+  }).join(', ');
+
   return text
+    .replace(/\{\{\s*place\s*\}\}/gi, place)
+    .replace(/\{\{\s*area\s*\}\}/gi, area || city)
     .replace(/\{\{\s*city\s*\}\}/gi, city)
     .replace(/\{\{\s*state\s*\}\}/gi, state)
     .replace(/\{\{\s*country\s*\}\}/gi, country)

@@ -78,8 +78,19 @@
     document.querySelectorAll('[data-loc-text]').forEach(function (el) {
       var tpl = el.getAttribute('data-loc-text');
       if (!tpl || tpl.indexOf('{{') === -1) return;
+      var area = location.area || '';
+      var cityName = location.city || '';
+      // Same rule as personalise() on the server: neighbourhood then city,
+      // de-duplicated, so "Saket, Delhi" but just "Mapusa" when they match.
+      var place = [area, cityName]
+        .filter(Boolean)
+        .filter(function (part, i, all) { return all.indexOf(part) === i; })
+        .join(', ');
+
       var text = tpl
-        .replace(/\{\{\s*city\s*\}\}/gi, location.city || '')
+        .replace(/\{\{\s*place\s*\}\}/gi, place)
+        .replace(/\{\{\s*area\s*\}\}/gi, area || cityName)
+        .replace(/\{\{\s*city\s*\}\}/gi, cityName)
         .replace(/\{\{\s*state\s*\}\}/gi, location.state || '')
         .replace(/\{\{\s*country\s*\}\}/gi, location.country || '');
 
@@ -95,8 +106,12 @@
     });
 
     var shortLoc = document.querySelector('[data-loc-short]');
-    if (shortLoc && location.city) {
-      shortLoc.textContent = location.city + (location.state && location.state !== location.city ? ', ' + location.state : '');
+    if (shortLoc && (location.area || location.city)) {
+      var parts = [location.area, location.city, location.state].filter(Boolean).filter(function (p, i, all) {
+        return all.indexOf(p) === i;
+      });
+      // Two names is enough for a top bar; three reads like an address.
+      shortLoc.textContent = parts.slice(0, 2).join(', ');
     }
   }
 

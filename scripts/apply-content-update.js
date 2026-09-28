@@ -90,7 +90,7 @@ const SETTINGS = {
  * when there is a new one-off content change to push.
  */
 const MARKER_KEY = 'content_update_rev';
-const REVISION = '2026-09-25-seo-keywords';
+const REVISION = '2026-09-29-place-token';
 
 /** --soft: never fail the build. A deploy must not break because the database
  *  was briefly unreachable; the update can be run again by hand. */
@@ -174,6 +174,9 @@ async function main() {
     hero.secondaryBtnLink = 'https://wa.link/pbjr74';
     hero.secondaryBtnIcon = 'fab fa-whatsapp';
     hero.description = COPY.hero.description;
+    // {{place}} resolves to "Saket, Delhi" where {{city}} only ever said
+    // "Delhi", which is too broad to tell anyone whether they are covered.
+    if (typeof hero.badge === 'string') hero.badge = hero.badge.replace(/{{s*citys*}}/gi, '{{place}}');
     hero.stats = [
       { value: 9000, label: 'Jobs Done', accent: false },
       { value: 8500, label: 'Happy Customers', accent: true },
