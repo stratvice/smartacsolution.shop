@@ -11,11 +11,38 @@
 
 html{
   scroll-behavior:smooth;
+  /* body alone is not enough. When the value propagates from body to the
+     viewport, body stops clipping its own overflow, and Chrome on Android
+     still lets the page pan sideways -- which showed as a blank strip down
+     the right of every section on a phone. */
+  overflow-x:hidden;
 }
 
 body{
   overflow-x:hidden;
   font-family:'DM Sans',sans-serif;
+}
+
+/* AOS parks a fade-left element 100px to the right of where it belongs until
+   it animates in, and fade-right 100px to the left. On a desktop there is room
+   for that; at 375px it is 109px of page nobody asked for, which is the blank
+   strip that appeared down the side of every section on a phone.
+
+   These two directions are simply switched off below the lg breakpoint: the
+   element sits where it belongs and is visible from the start. Deliberately
+   not "animate vertically instead" -- that leaves the element hidden until a
+   class arrives, and anything that stops AOS running leaves a blank column on
+   a phone. fade-up is unaffected and still animates.
+
+   The doubled attribute matches aos.css's own specificity for the hidden
+   state, and comes later, so it wins; the .aos-animate rule is more specific
+   still and also resolves to visible, so the element is visible either way. */
+@media (max-width:991.98px){
+  [data-aos="fade-left"][data-aos="fade-left"],
+  [data-aos="fade-right"][data-aos="fade-right"]{
+    opacity:1;
+    transform:none;
+  }
 }
 
 /* Prevent image overflow */
