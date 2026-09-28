@@ -466,16 +466,16 @@
           </div>
           <% } %>
           <% if (phone) { %>
-          <div class="contact-info-item">
+          <a href="<%= telHref %>" class="contact-info-item is-link" aria-label="Call <%= phone %>">
             <div class="contact-icon"><i class="fa fa-phone"></i></div>
-            <div><h6>Call Us</h6><p><a href="<%= telHref %>" style="color:#fff; text-decoration:none;"><%= phone %></a></p></div>
-          </div>
+            <div><h6>Call Us</h6><p><%= phone %></p></div>
+          </a>
           <% } %>
           <% if (S.whatsapp) { %>
-          <div class="contact-info-item">
+          <a href="<%= waHref %>" class="contact-info-item is-link is-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp">
             <div class="contact-icon" style="border-color:#25D366; color:#25D366; background:rgba(37,211,102,0.1);"><i class="fab fa-whatsapp"></i></div>
-            <div><h6>WhatsApp</h6><p><a href="<%= waHref %>" style="color:#25D366; text-decoration:none;"><%= contact.whatsappButtonText || 'Chat with us' %></a></p></div>
-          </div>
+            <div><h6>WhatsApp</h6><p><%= contact.whatsappButtonText || 'Chat with us' %></p></div>
+          </a>
           <% } %>
           <% if (S.working_hours_full) { %>
           <div class="contact-info-item">

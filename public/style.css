@@ -1719,6 +1719,48 @@ margin-right:30px;
     line-height:1.8;
 }
 
+/* Call Us and WhatsApp are whole-row links: the icon, the heading and the
+   value are one tap target rather than a single line of text. An anchor
+   inherits none of the card's colours, so restate them here. */
+a.contact-info-item{
+    text-decoration:none;
+    color:inherit;
+    border-radius:14px;
+    padding:6px;
+    margin-left:-6px;
+    margin-right:-6px;
+    transition:background .25s, transform .25s;
+}
+
+a.contact-info-item h6{
+    color:#fff;
+}
+
+a.contact-info-item p{
+    color:#fff;
+}
+
+a.contact-info-item.is-whatsapp p{
+    color:#25D366;
+}
+
+a.contact-info-item:hover,
+a.contact-info-item:focus-visible{
+    background:rgba(255,255,255,.07);
+    transform:translateX(3px);
+    color:inherit;
+}
+
+a.contact-info-item:focus-visible{
+    outline:2px solid #ff9800;
+    outline-offset:2px;
+}
+
+/* The padding above would otherwise eat into the 28px rhythm between rows. */
+a.contact-info-item{
+    margin-bottom:22px;
+}
+
 .contact-form{
     border-radius:20px !important;
     box-shadow:0 15px 35px rgba(0,0,0,.08)!important;
