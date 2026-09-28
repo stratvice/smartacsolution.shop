@@ -191,6 +191,9 @@
 
 
     </a>
+    <a class="nav-cta nav-cta-mobile d-lg-none ms-auto" href="<%= S.nav_cta_link || telHref %>" aria-label="<%= S.nav_cta_text || 'Call Now' %>">
+      <i class="fa fa-phone" aria-hidden="true"></i><span><%= S.nav_cta_text || 'Call Now' %></span>
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -202,7 +205,7 @@
         <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
         <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-        <li class="nav-item ms-2"><a class="nav-link nav-cta" href="<%= S.nav_cta_link || telHref %>"><i class="fa fa-phone me-1"></i> <%= S.nav_cta_text || 'Call Now' %></a></li>
+        <li class="nav-item ms-2 d-none d-lg-block"><a class="nav-link nav-cta" href="<%= S.nav_cta_link || telHref %>"><i class="fa fa-phone me-1"></i> <%= S.nav_cta_text || 'Call Now' %></a></li>
       </ul>
     </div>
   </div>

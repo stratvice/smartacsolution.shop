@@ -100,6 +100,54 @@ img{
   background:#052d45;
 }
 
+/* The phone-sized copy of the CTA, which sits in the bar rather than inside
+   the collapsed menu. Tighter than the desktop one because it shares a narrow
+   row with the brand and the hamburger.
+
+   Qualified with .navbar because the mobile section further down sets
+   .nav-cta{display:inline-block}; equal specificity and a later position
+   would otherwise win, and inside a flex row that blockifies to a full-width
+   block that pushes the hamburger onto its own line. */
+.navbar .nav-cta-mobile{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  /* .nav-cta is width:100% under 768px, which is right for the copy inside the
+     open menu and wrong for this one: full width pushes the hamburger onto a
+     line of its own. Size to the label instead, and sit hard against the
+     toggler. */
+  width:auto;
+  margin-left:auto;
+  margin-right:8px;
+  padding:10px 13px;
+  min-height:40px;
+  /* Sized so the brand, this and the hamburger all fit across 375px, which
+     is the narrowest common phone. */
+  font-size:.82rem;
+  font-weight:700;
+  line-height:1;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+.navbar .nav-cta-mobile:hover,
+.navbar .nav-cta-mobile:focus{
+  color:#fff;
+}
+
+/* Below 380px the brand and the hamburger need the room more than the word
+   does; the icon alone still reads as "call". */
+/* Only drop the word when the row genuinely runs out of room; at 375px the
+   brand, the label and the hamburger all still fit. */
+@media (max-width:345px){
+  .navbar .nav-cta-mobile span{
+    display:none;
+  }
+  .navbar .nav-cta-mobile{
+    padding:9px 12px;
+  }
+}
+
 /* ==========================
    Mobile Navbar
    ========================== */
